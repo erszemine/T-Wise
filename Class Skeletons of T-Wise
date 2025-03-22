@@ -2,28 +2,22 @@ from abc import ABC, abstractmethod
 
 # Interfaces
 class IBirim(ABC):
-    @abstractmethod
     def get_ad(self) -> str:
         pass
     
-    @abstractmethod
     def get_yetkiler(self) -> list:
         pass
 
 class ICalisan(ABC):
-    @abstractmethod
     def get_ad(self) -> str:
         pass
-    
-    @abstractmethod
+
     def get_pozisyon(self) -> str:
         pass
     
-    @abstractmethod
     def get_fonksiyonlar(self) -> list:
         pass
     
-    @abstractmethod
     def get_birim(self) -> IBirim:
         pass
 
@@ -92,13 +86,11 @@ class ITUzmani(Calisan):
 
 # Factory Pattern
 class CalisanFactory:
-    @staticmethod
     def create_calisan(pozisyon: str, ad: str) -> Calisan:
         pass
 
 # Observer Pattern
 class Observer(ABC):
-    @abstractmethod
     def update(self):
         pass
 
