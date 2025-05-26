@@ -1,0 +1,5 @@
+.venv/              # Sanal ortam klasörü
+_pycache_/        # Python derleme önbelleği
+*.pyc               # Python derlenmiş dosyaları
+.pytest_cache/      # Pytest önbelleği
+.env                # Ortam değişkenleri dosyası (hassas bilgiler içerir)
