@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS Stock (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER UNIQUE NOT NULL,
+    amount INTEGER NOT NULL DEFAULT 0 CHECK (amount >= 0),
+    critical_stock_level INTEGER NOT NULL DEFAULT 0,
+    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE CASCADE,
+);
