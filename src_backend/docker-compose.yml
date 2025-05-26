@@ -1,0 +1,19 @@
+version: '3.8' # Docker Compose sürümü
+
+services:
+  db:
+    image: postgres:16-alpine # Kullanılacak PostgreSQL imajı. Alpine versiyonu daha hafiftir.
+    container_name: your_project_db_container # Konteynerinize anlamlı bir isim verin
+    environment:
+      POSTGRES_DB: stok_db # Oluşturulacak veritabanının adı
+      POSTGRES_USER: your_postgres_user # Veritabanı kullanıcısı
+      POSTGRES_PASSWORD: your_postgres_password # Veritabanı kullanıcısının şifresi
+    ports:
+      - "5432:5432" # Host portu (sol) ile konteyner portunu (sağ) eşleştirir.
+                    # Bu sayede host'unuzdan 5432 portu üzerinden erişebilirsiniz.
+    volumes:
+      - db_data:/var/lib/postgresql/data # Verilerin kalıcı depolanması için volume
+    restart: always # Konteynerin her zaman yeniden başlamasını sağlar (Docker başlasa bile)
+
+volumes:
+  db_data: # Veritabanı verileri için Docker volume tanımı
