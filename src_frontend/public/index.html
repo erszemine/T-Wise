@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Depo ve Stok Yönetim Sistemi</title>
+    <link rel="stylesheet" href="../src/assets/styles/main.css" />
+</head>
+<body>
+    <header>
+        Depo ve Stok Yönetim Sistemi
+        <button id="logoutBtn" style="display:none;" title="Çıkış Yap">Çıkış</button>
+    </header>
+    <main>
+        <section id="loginScreen" aria-label="Giriş Ekranı">
+            <form id="loginForm" aria-label="Giriş Formu" novalidate>
+                <h2>Giriş Yap</h2>
+                <label for="username">Kullanıcı Adı</label>
+                <input type="text" id="username" name="username" autocomplete="username" required />
+                <label for="password">Şifre</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required />
+                <button type="submit" class="btn">Giriş Yap</button>
+                <div id="loginError" role="alert" aria-live="assertive"></div>
+            </form>
+        </section>
+
+        <nav aria-label="Ana Menü" style="display:none;">
+            <button class="active" data-section="stokTakip">Stok Takibi</button>
+            <button data-section="tedarikPlanlama">Tedarik Planlama</button>
+            <button data-section="lojistikPlanlama">Lojistik Planlama</button>
+            <button data-section="uretimRapor">Üretim Raporları</button>
+            <button data-section="stokGuncelleme">Stok Güncelleme</button>
+            <button data-section="uretimParcalari">Üretim Parçaları</button>
+        </nav>
+        <section class="content" id="mainContent" style="display:none;">
+            </section>
+    </main>
+
+    <script src="../src/js/components/tableRenderer.js" type="module"></script>
+    <script src="../src/js/api.js" type="module"></script>
+    <script src="../src/js/auth.js" type="module"></script>
+    <script src="../src/js/app.js" type="module"></script>
+    <script src="../src/index.js" type="module"></script>
+</body>
+</html>
