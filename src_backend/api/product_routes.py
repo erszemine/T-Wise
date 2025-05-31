@@ -1,0 +1,1 @@
+#bunu denemek için yazıyorum su an içeriyi görecek miyim diye bi sey yaptım 
