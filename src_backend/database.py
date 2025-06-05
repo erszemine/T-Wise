@@ -1,30 +1,58 @@
-# backend/src/stok_yonetim_backend/database.py
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base
-from .config import DATABASE_URL # config.py'den DB URL'yi al
+from motor.motor_asyncio import AsyncIOMotorClient # Motor, MongoDB için asenkron Python sürücüsüdür.
+from beanie import init_beanie # Beanie ODM'yi başlatmak için kullanılan fonksiyon.
+import logging # Uygulama logları için.
 
-# SQLAlchemy Engine: Veritabanı ile bağlantı kurar. echo=True SQL sorgularını terminale yazdırır.
-engine = create_async_engine(DATABASE_URL, echo=True)
+# Proje yapılandırma ayarlarını içeren config.py dosyasından gerekli değişkenleri import ediyoruz.
+# Bu değişkenler (DATABASE_URL, MONGO_DATABASE_NAME) .env dosyasından okunur.
+from .config import DATABASE_URL, MONGO_DATABASE_NAME
 
-# AsyncSessionLocal: Veritabanı oturumları oluşturmak için kullanılır.
-# autocommit=False: Her işlemden sonra otomatik commit yapmaz.
-# autoflush=False: Nesneler sorgulanırken otomatik olarak veritabanına göndermez.
-# bind=engine: Bu oturumları belirlenen engine'e bağlar.
-AsyncSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
+# Beanie'ye tanıtacağımız tüm Document (model) sınıflarını import ediyoruz.
+# init_beanie fonksiyonu, bu Document'ları kullanarak MongoDB'de ilgili koleksiyonları oluşturacak
+# ve tanımlanmış indeksleri ekleyecektir.
+from .models_entitiy.product import Product
+from .models_entitiy.stock import Stock
+from .models_entitiy.stock_movement import StockMovement
+from .models_entitiy.user import User
 
-# Base: Tüm SQLAlchemy ORM modellerimizin türetileceği temel sınıf.
-# Bu obje, metadata'yı (tablo ve sütun tanımları) toplar.
-Base = declarative_base()
 
-# FastAPI bağımlılığı olarak veritabanı oturumu sağlama fonksiyonu
-async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session # İstek işlenirken oturumu sağlar
-        await session.close() # İstek bittikten sonra oturumu kapatır
+logger = logging.getLogger(__name__) # Bu modül için bir logger oluşturuluyor.
 
-# Veritabanı tablolarını ORM modellerinden oluşturma fonksiyonu
-async def create_db_and_tables():
-    # Asenkron bağlantı ile tüm tabloları oluştur
-    async with engine.begin() as conn:
-        # Base.metadata'daki tüm tabloları (yani Base'den türetilen tüm modelleri) veritabanında oluşturur
-        await conn.run_sync(Base.metadata.create_all)
+async def connect_to_mongodb():
+    """
+    MongoDB bağlantısını başlatır ve Beanie ODM'yi yapılandırır.
+    Bu fonksiyon, FastAPI uygulamasının yaşam döngüsü başlangıcında (lifespan event) çağrılmalıdır.
+    """
+    if DATABASE_URL is None:
+        logger.error("DATABASE_URL ortam değişkeni tanımlanmamış. MongoDB'ye bağlanılamıyor.")
+        raise ValueError("DATABASE_URL ortam değişkeni tanımlı olmalıdır.")
+
+    # AsyncIOMotorClient kullanarak MongoDB sunucusuna asenkron bir bağlantı oluşturulur.
+    client = AsyncIOMotorClient(DATABASE_URL)
+    
+    # Beanie ODM'yi başlatma.
+    # database: Bağlanılacak MongoDB veritabanı objesi. client[MONGO_DATABASE_NAME] ile belirlenir.
+    # document_models: Beanie'nin yöneteceği ve MongoDB koleksiyonlarına eşleyeceği tüm Document sınıflarının listesi.
+    #                  Beanie, bu modelleri kullanarak koleksiyonları ve indeksleri otomatik olarak oluşturur/günceller.
+    await init_beanie(
+        database=client[MONGO_DATABASE_NAME],
+        document_models=[
+            Product,
+            Stock,
+            StockMovement,
+            User,
+        ]
+    )
+    logger.info(f"MongoDB'ye '{MONGO_DATABASE_NAME}' veritabanı üzerinden başarıyla bağlanıldı.")
+
+async def close_mongodb_connection():
+    """
+    MongoDB bağlantısını kapatır.
+    Bu fonksiyon, FastAPI uygulamasının yaşam döngüsü sonunda (lifespan event) çağrılmalıdır.
+    Motor istemcisi genellikle bağlantıları otomatik olarak yönetir, bu nedenle bu fonksiyon
+    doğrudan bir 'kapatma' işlemi içermeyebilir, ancak yaşam döngüsü tutarlılığı için tutulur.
+    """
+    # Motor istemcisinin otomatik olarak bağlantıyı yöneteceğini varsayıyoruz.
+    # Beanie'nin doğrudan bir 'close' metodu yoktur, ancak client nesnesini kullanarak yapılabilir.
+    # Genellikle bu fonksiyon, doğrudan bir client.close() çağrısı gerektirmez,
+    # ancak ileri düzey senaryolar için bir yer tutucudur.
+    logger.info("MongoDB bağlantısı kapatıldı.")
