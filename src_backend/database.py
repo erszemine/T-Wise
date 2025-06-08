@@ -1,3 +1,4 @@
+'''
 from motor.motor_asyncio import AsyncIOMotorClient # Motor, MongoDB için asenkron Python sürücüsüdür.
 from beanie import init_beanie # Beanie ODM'yi başlatmak için kullanılan fonksiyon.
 import logging # Uygulama logları için.
@@ -55,4 +56,45 @@ async def close_mongodb_connection():
     # Beanie'nin doğrudan bir 'close' metodu yoktur, ancak client nesnesini kullanarak yapılabilir.
     # Genellikle bu fonksiyon, doğrudan bir client.close() çağrısı gerektirmez,
     # ancak ileri düzey senaryolar için bir yer tutucudur.
-    logger.info("MongoDB bağlantısı kapatıldı.")
+    logger.info("MongoDB bağlantısı kapatıldı.") '''
+
+# src_backend/database.py
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie, Document
+from dotenv import load_dotenv
+from typing import List, Type
+
+# Modelleri buraya import edin
+from models_entity.Product import Product
+from models_entity.Stock import Stock
+from models_entity.StockMovement import StockMovement
+from models_entity.User import User
+# from models_entity.UretimTalebi import UretimTalebi # Üretim talebi kullanılmayacağı için yorum satırı yapıldı veya silindi
+
+load_dotenv() # .env dosyasını yükle
+
+# Tüm Beanie Document modellerini listeleyin (UretimTalebi hariç)
+document_models: List[Type[Document]] = [
+    Product,
+    Stock,
+    StockMovement,
+    User,
+]
+
+async def connect_db():
+    mongo_uri = os.getenv("MONGO_URI")
+    if not mongo_uri:
+        raise ValueError("MONGO_URI ortam değişkeni ayarlanmamış.")
+
+    try:
+        client = AsyncIOMotorClient(mongo_uri)
+        # URI'den veritabanı adını çek
+        database_name = mongo_uri.split('/')[-1].split('?')[0]
+        db = client[database_name]
+
+        await init_beanie(database=db, document_models=document_models)
+        print(f"MongoDB'ye başarıyla bağlandı! Veritabanı: {database_name}")
+    except Exception as e:
+        print(f"MongoDB bağlantı hatası: {e}")
+        raise e

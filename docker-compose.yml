@@ -1,0 +1,29 @@
+# T-Wise/docker-compose.yml dosyası
+# version: '3.8' # Bu satırı tamamen silin!
+
+services:
+  backend:
+    build: ./src_backend # src_backend dizinine göre build et
+    ports:
+      - "8000:8000"
+    environment:
+      # Backend'in Docker içinde çalışacağını varsayarak mongodb servis adını kullanın
+      MONGO_URI: mongodb://admin:Sistem@mongodb:27017/stock_management_db?authSource=admin
+      JWT_SECRET_KEY: your_super_secret_jwt_key_here_for_fastapi_prod_only
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: Sistem
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

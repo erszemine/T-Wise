@@ -1,0 +1,10 @@
+fastapi==0.111.0 # En son uyumlu sürümü kullanabilirsiniz
+uvicorn[standard]==0.30.1 # Veya en son uyumlu sürüm
+beanie==1.25.0 # Veya en son uyumlu sürüm
+motor==3.3.2 # Veya en son uyumlu sürüm
+pymongo==4.6.2 # Bu satırı ekleyin veya güncelleyin
+python-dotenv==1.0.1 # Veya en son uyumlu sürüm
+passlib[bcrypt]==1.7.4 # Veya en son uyumlu sürüm
+python-jose[cryptography]==3.3.0 # Veya en son uyumlu sürüm
+pydantic==2.7.4 # FastAPI bağımlılığı
+pydantic-settings==2.3.4 # Eğer settings yönetimi için kullanacaksanız
