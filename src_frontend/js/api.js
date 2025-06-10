@@ -1,5 +1,5 @@
 // frontend/src/js/api.js
-const API_BASE_URL = "http://localhost:8000"; // Backend adresiniz buraya gelecek
+const API_BASE_URL = "http://localhost:8000"; // Backend adresiniz buraya geldi
 
 // Helper function to get JWT token from localStorage
 function getAuthToken() {
