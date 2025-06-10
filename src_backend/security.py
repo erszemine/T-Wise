@@ -1,20 +1,7 @@
-'''
-from datetime import datetime, timedelta
-from typing import Optional
-from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-
-from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES # <-- İşte burada kullanıyoruz!
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# ... JWT token oluşturma, doğrulama vb. fonksiyonları ...
-'''
 # src_backend/security.py
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional, List # List import'ı eklendi
+from typing import Optional, List
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -24,9 +11,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from models_entity.User import User
-from bson.objectid import ObjectId
+from beanie import PydanticObjectId # Değişiklik: ObjectId yerine PydanticObjectId
 
-load_dotenv()
+load_dotenv() # .env dosyasını yükler
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
@@ -69,18 +56,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     except JWTError:
         raise credentials_exception
 
-    user = await User.get(ObjectId(user_id))
+    user = await User.get(PydanticObjectId(user_id)) # Değişiklik: ObjectId yerine PydanticObjectId
     if user is None:
         raise credentials_exception
-    if not user.is_active: # Kullanıcının aktif olup olmadığını kontrol edin
+    if not user.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     return user
 
 async def authenticate_user(username: str, password: str) -> Optional[User]:
     user = await User.find_one(User.username == username)
-    if user and verify_password(password, user.password_hash):
-        return user
-    return None
+    if user: # Kullanıcı bulunduysa şifreyi doğrula
+        if verify_password(password, user.password_hash):
+            return user
+    return None # Kullanıcı bulunamazsa veya şifre yanlışsa None döndürür
 
 def role_required(roles: List[str]):
     def role_checker(current_user: User = Depends(get_current_user)):

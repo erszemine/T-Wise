@@ -5,9 +5,18 @@ from typing import List
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db
-from .models.user import User 
-from .enums import Permission 
+from database import get_db
+from models_entity import User
+from enums import Permission 
+
+# Dummy implementation for get_current_active_user
+from fastapi import Depends
+
+async def get_current_active_user(current_user: User = Depends(lambda: User(id=1, is_active=True))):
+    # Replace this with your actual logic to get the current active user
+    if not current_user.is_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Devre dışı bırakılmış kullanıcı")
+    return current_user
 
 # Varsayımsal bir kullanıcı yetki veritabanı veya rol tablosu
 # Gerçek uygulamada bu bilgiler veritabanından çekilmelidir.
