@@ -20,7 +20,7 @@ async def get_all_products():
     products = await Product.find_all().to_list()
     
     # ProductListResponse şemasına uygun hale getiriyoruz
-    product_responses = [ProductResponse.model_validate(p) for p in products]
+    product_responses = [ProductResponse.model_validate(p.model_dump(by_alias=True)) for p in products]
     return ProductListResponse(products=product_responses, total_count=len(products))
 
 @router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED, summary="Yeni bir ürün/parça oluştur")

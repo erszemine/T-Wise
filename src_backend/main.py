@@ -1,22 +1,12 @@
 # src_backend/main.py
-# src_backend/main.py
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-
-# src_backend paketinin içindeki database modülünü içe aktar
-from src_backend.database import connect_db
-
-# src_backend paketinin içindeki api.product_routes modülünü içe aktar
-from src_backend.api.product_routes import router as product_router
-
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import os
 from typing import Optional
 from pydantic import BaseModel, Field, ValidationError
-from datetime import timedelta, timezone, datetime # datetime import edildi
+from datetime import datetime, timedelta, timezone
+import os
 
 
 # --- Pydantic Request/Response Modelleri (Login/Register için) ---
@@ -77,11 +67,16 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+origins = [
+    "https://special-space-eureka-454jvxrvq9rh7jq9-8000.app.github.dev", # Backend URL'si
+    "https://special-space-eureka-454jvxrvq9rh7jq9-8001.app.github.dev", # BURADA SİZİN FRONTEND URL'İNİZ OLMALI!
+    # Eğer frontend'i farklı bir portta (örn. 8002, 8003) test ederseniz, o URL'leri de buraya eklemelisiniz.
+]
 
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -71,7 +71,7 @@ class ProductResponse(ProductBase):
 
     class Config:
         populate_by_name = True # _id alanını id olarak kullanmamızı sağlar
-        json_schema_extra = {
+        """json_schema_extra = {
             "example": {
                 "id": "60c72b2f9f1b2c3d4e5f6a7b", # Örnek ObjectId
                 "name": "Ön Fren Balatası",
@@ -88,7 +88,7 @@ class ProductResponse(ProductBase):
                 "created_at": "2023-01-15T10:30:00.000Z",
                 "updated_at": "2023-01-15T10:30:00.000Z"
             }
-        }
+        }"""
 
 # API response for a list of products
 class ProductListResponse(BaseModel):
@@ -96,7 +96,7 @@ class ProductListResponse(BaseModel):
     total_count: int
 
     class Config:
-        json_schema_extra = {
+        """json_schema_extra = {
             "example": {
                 "products": [
                     {
@@ -118,4 +118,4 @@ class ProductListResponse(BaseModel):
                 ],
                 "total_count": 1
             }
-        }
+        }"""
