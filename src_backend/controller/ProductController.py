@@ -70,3 +70,4 @@ class ProductController:
         # Silme öncesi bağımlılık kontrolleri gibi iş mantığı eklenebilir.
         result = await self.product_repository.delete_product(product_id)
         return result
+    
