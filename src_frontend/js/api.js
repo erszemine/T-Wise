@@ -1,5 +1,5 @@
 // frontend/src/js/api.js
-const API_BASE_URL = "http://localhost:8000"; // Backend adresiniz buraya geldi
+const API_BASE_URL = "https://reimagined-space-dollop-4j6qpgx9jqprfq4pr-8000.app.github.dev/"; // Backend adresiniz buraya geldi
 
 // Helper function to get JWT token from localStorage
 function getAuthToken() {
