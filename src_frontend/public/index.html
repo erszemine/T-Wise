@@ -4,7 +4,265 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Depo ve Stok Yönetim Sistemi</title>
-    <link rel="stylesheet" href="../src/assets/styles/main.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            background: #f7f9fc;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: #4a90e2;
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 3px 8px rgb(74 144 226 / 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        main {
+            display: flex;
+            flex: 1 1 auto;
+            min-height: calc(100vh - 70px);
+        }
+        nav {
+            width: 220px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            border-left: 5px solid transparent;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+        nav button:hover, nav button.active {
+            background: #34495e;
+            border-left: 5px solid #4a90e2;
+        }
+        section.content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: white;
+        }
+        h2 {
+            color: #4a90e2;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 0.3rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        table thead tr {
+            background: #4a90e2;
+            color: white;
+            text-align: left;
+        }
+        table th, table td {
+            padding: 0.6rem 1rem;
+            border: 1px solid #ddd;
+        }
+        table tbody tr:nth-child(even) {
+            background: #f0f6fc;
+        }
+        .btn {
+            display: inline-block;
+            background: #4a90e2;
+            color: white;
+            padding: 0.5rem 1.1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background-color 0.3s ease;
+            user-select: none;
+        }
+        .btn:hover:not(:disabled) {
+            background: #367bbc;
+        }
+        .btn:disabled {
+            background: #a0b8d6;
+            cursor: not-allowed;
+        }
+        form {
+            max-width: 500px;
+            margin-top: 1rem;
+        }
+        form label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+        form input, form select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .flex-row > * {
+            flex: 1;
+            min-width: 160px;
+        }
+        .notification {
+            margin-bottom: 1rem;
+            padding: 0.8rem 1rem;
+            background-color: #dff0d8;
+            color: #3c763d;
+            border-radius: 4px;
+            border: 1px solid #d6e9c6;
+            font-weight: 600;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #842029;
+            border-color: #f5c2c7;
+        }
+
+        /* Scrollbar styling */
+        section.content::-webkit-scrollbar {
+            width: 8px;
+        }
+        section.content::-webkit-scrollbar-thumb {
+            background: #4a90e2;
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            main {
+                flex-direction: column;
+            }
+            nav {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            nav button {
+                flex: 1;
+                text-align: center;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                padding: 1rem 0.5rem;
+                font-size: 0.9rem;
+            }
+            nav button:hover, nav button.active {
+                border-left: none;
+                border-bottom: 3px solid #4a90e2;
+            }
+            section.content {
+                padding: 1rem;
+                min-height: 600px;
+            }
+        }
+
+        /* Login ekranı */
+        #loginScreen {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #e8f0fe;
+            height: calc(100vh - 70px);
+        }
+        #loginForm {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+            width: 320px;
+        }
+        #loginForm h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #4a90e2;
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+        #loginForm label {
+            font-weight: 600;
+        }
+        #loginForm input[type="text"],
+        #loginForm input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.3rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        #loginForm button {
+            width: 100%;
+            padding: 0.6rem 0;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #loginError {
+            margin-top: 1rem;
+            color: #842029;
+            background-color: #f8d7da;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        /* Çıkış butonu */
+        #logoutBtn {
+            cursor: pointer;
+            background: #e74c3c;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        #logoutBtn:hover {
+            background: #c0392b;
+        }
+        #logoutBtn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.5);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -12,6 +270,7 @@
         <button id="logoutBtn" style="display:none;" title="Çıkış Yap">Çıkış</button>
     </header>
     <main>
+        <!-- Login Ekranı -->
         <section id="loginScreen" aria-label="Giriş Ekranı">
             <form id="loginForm" aria-label="Giriş Formu" novalidate>
                 <h2>Giriş Yap</h2>
@@ -24,6 +283,7 @@
             </form>
         </section>
 
+        <!-- Ana Arayüz -->
         <nav aria-label="Ana Menü" style="display:none;">
             <button class="active" data-section="stokTakip">Stok Takibi</button>
             <button data-section="tedarikPlanlama">Tedarik Planlama</button>
@@ -33,13 +293,415 @@
             <button data-section="uretimParcalari">Üretim Parçaları</button>
         </nav>
         <section class="content" id="mainContent" style="display:none;">
-            </section>
+            <!-- İçerik dinamik olarak JS tarafından güncellenecek -->
+        </section>
     </main>
 
-    <script src="../src/js/components/tableRenderer.js" type="module"></script>
-    <script src="../src/js/api.js" type="module"></script>
-    <script src="../src/js/auth.js" type="module"></script>
-    <script src="../src/js/app.js" type="module"></script>
-    <script src="../src/index.js" type="module"></script>
+        <!-- ... (HTML, HEAD, BODY, HEADER, MAIN bölümleri aynı kalır) ... -->
+
+<script type="module"> // type="module" eklemeyi unutmayın, çünkü import kullanacağız
+    import { api } from '/js/api.js'; // api.js dosyasını import ettik
+
+    // DOM referansları
+    const loginScreen = document.getElementById("loginScreen");
+    const loginForm = document.getElementById("loginForm");
+    const loginError = document.getElementById("loginError");
+    const nav = document.querySelector("nav");
+    const mainContent = document.getElementById("mainContent");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Kullanıcı durumu
+    let loggedIn = false;
+    let accessToken = null; // Token'ı burada saklayacağız
+    let parcalar = []; // API'den çekilecek ürünler için boş array
+
+    function showLoginScreen() {
+        loginError.style.display = "none";
+        loginForm.reset();
+        loginScreen.style.display = "flex";
+        nav.style.display = "none";
+        mainContent.style.display = "none";
+        logoutBtn.style.display = "none";
+        loggedIn = false;
+        accessToken = null;
+        localStorage.removeItem('access_token'); // Token'ı temizle
+    }
+
+    async function showMainApp() {
+        loginScreen.style.display = "none";
+        nav.style.display = "flex";
+        mainContent.style.display = "block";
+        logoutBtn.style.display = "inline-block";
+        loggedIn = true;
+        await renderStokTakip(); // Ana uygulamayı başlatırken stok takibini API'den çek
+    }
+
+    // Login form submit - Şimdi Backend API'sine bağlanacak!
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = loginForm.username.value.trim();
+        const password = loginForm.password.value;
+
+        loginError.style.display = "none"; // Hata mesajını sıfırla
+        loginError.textContent = "";
+        loginForm.querySelector('button[type="submit"]').disabled = true; // Butonu devre dışı bırak
+
+        try {
+            // api.js'deki login fonksiyonunu kullanıyoruz
+            const data = await api.login(username, password);
+            accessToken = data.access_token;
+            localStorage.setItem('access_token', accessToken); // Token'ı localStorage'a kaydet
+            await showMainApp();
+        } catch (error) {
+            console.error('Giriş sırasında hata:', error);
+            loginError.textContent = error.message || "Giriş başarısız oldu. Kullanıcı adı veya şifre yanlış.";
+            loginError.style.display = "block";
+        } finally {
+            loginForm.querySelector('button[type="submit"]').disabled = false; // Butonu tekrar etkinleştir
+        }
+    });
+
+    // Çıkış butonu
+    logoutBtn.addEventListener("click", () => {
+        showLoginScreen();
+    });
+
+    // Fonksiyonlar Bölümü - Backend API çağrılarına göre güncellenecek
+
+    function clearContent() {
+        mainContent.innerHTML = "";
+    }
+    function createTable(headers, rows) {
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const thr = document.createElement("tr");
+        headers.forEach(hdr => {
+            const th = document.createElement("th");
+            th.textContent = hdr;
+            thr.appendChild(th);
+        });
+        thead.appendChild(thr);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+        rows.forEach(row => {
+            const tr = document.createElement("tr");
+            row.forEach(cell => {
+                const td = document.createElement("td");
+                // Eğer cell bir objeyse ve 'name' property'si varsa onu kullan
+                // Aksi takdirde string'e çevir
+                td.textContent = (typeof cell === 'object' && cell !== null && 'name' in cell) ? cell.name : String(cell);
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        return table;
+    }
+
+    // Stok Takip Bölümü - Şimdi Backend'den veri çekecek!
+    async function renderStokTakip() {
+        clearContent();
+        const title = document.createElement('h2');
+        title.textContent = 'Stok Takibi';
+        mainContent.appendChild(title);
+
+        try {
+            // API'den ürünleri çek
+            // api.js'deki getStockItems henüz /api/products'ı işaret etmiyor, bu yüzden doğrudan fetch kullanalım.
+            // Eğer api.js'deki getStockItems'ı /api/products'ı çekecek şekilde güncellediysek onu kullanırız.
+            const response = await fetch(`${api.API_BASE_URL}api/products`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`API hatası: ${response.status} ${response.statusText}`);
+            }
+            const data = await response.json();
+            parcalar = data.products.map(p => ({ // Backend'den gelen 'products' listesini map'liyoruz
+                id: p.id,
+                isim: p.name,
+                stokAdet: p.current_stock
+            }));
+
+            const headers = ['Parça ID', 'Parça Adı', 'Stok Adedi'];
+            const rows = parcalar.map(p => [p.id, p.isim, p.stokAdet]);
+            mainContent.appendChild(createTable(headers, rows));
+
+            // Eğer hiç ürün yoksa bilgi mesajı göster
+            if (parcalar.length === 0) {
+                const info = document.createElement("p");
+                info.textContent = "Şu an stokta hiç ürün bulunmamaktadır.";
+                mainContent.appendChild(info);
+            }
+
+        } catch (error) {
+            console.error('Stok bilgisi çekilirken hata:', error);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'notification error';
+            errorDiv.textContent = `Stok bilgileri yüklenemedi: ${error.message}`;
+            mainContent.appendChild(errorDiv);
+            // Hata durumunda login ekranına yönlendirme
+            if (error.message.includes("Unauthorized") || error.message.includes("Forbidden")) {
+                 showLoginScreen();
+            }
+        }
+    }
+
+
+    // Diğer simüle edilmiş fonksiyonlar (tedarikPlanlama, lojistikPlanlama, uretimRapor, stokGuncelleme, uretimParcalari)
+    // Şimdilik aynı kalabilirler, ancak bunlar da daha sonra API'ye bağlanmalı.
+    // Backend'den çekilen verileri kullanmaları için düzenlenecekler.
+
+    let tedarikListesi = [
+        {id: 5, isim: "Kaporta Parçası", eksikAdet: 20, planlananTarih: "2024-07-10"},
+        {id: 4, isim: "Elektronik Kart", eksikAdet: 3, planlananTarih: "2024-06-28"}
+    ];
+    let lojistikPlan = [
+        {urun: "Ürün A", adet: 100, teslimTarihi: "2024-07-15"},
+        {urun: "Ürün B", adet: 200, teslimTarihi: "2024-07-20"}
+    ];
+    let uretimRaporlari = [
+        {urun: "Ürün A", adet: 100, teslimTarihi: "2024-07-15"},
+        {urun: "Ürün B", adet: 200, teslimTarihi: "2024-07-20"}
+    ];
+    let uretimParcalari = [
+        {urun: "Ürün A", parcaId: 1, parcaAdi: "Motor", adet: 1},
+        {urun: "Ürün A", parcaId: 3, parcaAdi: "Vida", adet: 5},
+        {urun: "Ürün B", parcaId: 2, parcaAdi: "Pervane", adet: 4},
+        {urun: "Ürün B", parcaId: 4, parcaAdi: "Elektronik Kart", adet: 2}
+    ];
+
+
+    // Tedarik Planlama Bölümü (simüle edilmiş veri kullanıyor)
+    function renderTedarikPlanlama() {
+        clearContent();
+        const title = document.createElement('h2');
+        title.textContent = 'Tedarik Planlama';
+        mainContent.appendChild(title);
+
+        const headers = ['Parça ID', 'Parça Adı', 'Eksik Adet', 'Planlanan Teslim Tarihi'];
+        const rows = tedarikListesi.map(t => [t.id, t.isim, t.eksikAdet, t.planlananTarih]);
+        mainContent.appendChild(createTable(headers, rows));
+
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.textContent = 'Eksik parçaların tedarik durumları buradan takip edilir.';
+        mainContent.appendChild(notif);
+    }
+
+    // Lojistik Planlama Bölümü (simüle edilmiş veri kullanıyor)
+    function renderLojistikPlanlama() {
+        clearContent();
+        const title = document.createElement('h2');
+        title.textContent = 'Lojistik Planlama';
+        mainContent.appendChild(title);
+
+        const headers = ['Ürün', 'Adet', 'Teslim Tarihi'];
+        const rows = lojistikPlan.map(l => [l.urun, l.adet, l.teslimTarihi]);
+        mainContent.appendChild(createTable(headers, rows));
+    }
+
+    // Üretim Raporları Bölümü (simüle edilmiş veri kullanıyor)
+    function renderUretimRapor() {
+        clearContent();
+        const title = document.createElement('h2');
+        title.textContent = 'Üretim Raporları';
+        mainContent.appendChild(title);
+
+        const headers = ['Ürün', 'Adet', 'Teslim Tarihi'];
+        const rows = uretimRaporlari.map(r => [r.urun, r.adet, r.teslimTarihi]);
+        mainContent.appendChild(createTable(headers, rows));
+    }
+
+    // Stok Güncelleme Bölümü (simüle edilmiş veri kullanıyor)
+    function renderStokGuncelleme() {
+        clearContent();
+        const title = document.createElement("h2");
+        title.textContent = "Stok Güncelleme";
+        mainContent.appendChild(title);
+
+        const form = document.createElement("form");
+        form.id = "stokGuncelleForm";
+
+        // Dropdown parça seçimi
+        const labelParca = document.createElement("label");
+        labelParca.textContent = "Parça Seçiniz:";
+        labelParca.setAttribute("for", "parcaSelect");
+        form.appendChild(labelParca);
+
+        const selectParca = document.createElement("select");
+        selectParca.id = "parcaSelect";
+        selectParca.required = true;
+        parcalar.forEach(p => {
+            const option = document.createElement("option");
+            option.value = p.id;
+            option.textContent = p.isim + " (Stok: " + p.stokAdet + ")";
+            selectParca.appendChild(option);
+        });
+        form.appendChild(selectParca);
+
+        // Giriş türü (giriş/çıkış)
+        const labelIslem = document.createElement("label");
+        labelIslem.textContent = "İşlem Türü:";
+        form.appendChild(labelIslem);
+
+        const selectIslem = document.createElement("select");
+        selectIslem.id = "islemTipi";
+        selectIslem.required = true;
+        const optGiris = document.createElement("option");
+        optGiris.value = "giris";
+        optGiris.textContent = "Parça Girişi";
+        const optCikis = document.createElement("option");
+        optCikis.value = "cikis";
+        optCikis.textContent = "Parça Çıkışı (Üretim)";
+        selectIslem.appendChild(optGiris);
+        selectIslem.appendChild(optCikis);
+        form.appendChild(selectIslem);
+
+        // Adet girişi
+        const labelAdet = document.createElement("label");
+        labelAdet.textContent = "Adet:";
+        labelAdet.setAttribute("for", "adetInput");
+        form.appendChild(labelAdet);
+
+        const inputAdet = document.createElement("input");
+        inputAdet.type = "number";
+        inputAdet.min = "1";
+        inputAdet.id = "adetInput";
+        inputAdet.required = true;
+        form.appendChild(inputAdet);
+
+        // Submit butonu
+        const btnSubmit = document.createElement("button");
+        btnSubmit.type = "submit";
+        btnSubmit.className = "btn";
+        btnSubmit.textContent = "Stok Güncelle";
+        form.appendChild(btnSubmit);
+
+        // Bildirim alanı
+        const notif = document.createElement("div");
+        notif.id = "stokGuncelleNotif";
+        notif.style.marginTop = "1rem";
+
+        mainContent.appendChild(form);
+        mainContent.appendChild(notif);
+
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const parcaId = parseInt(selectParca.value);
+            const islemTipi = selectIslem.value;
+            const adet = parseInt(inputAdet.value);
+            const parca = parcalar.find(p => p.id === parcaId);
+
+            if (!parca || isNaN(adet) || adet <= 0) {
+                notif.textContent = "Lütfen geçerli bir seçim yapınız.";
+                notif.className = "notification error";
+                return;
+            }
+
+            if (islemTipi === "cikis" && adet > parca.stokAdet) {
+                notif.textContent = "Çıkış yapmak için yeterli stok yok!";
+                notif.className = "notification error";
+                return;
+            }
+            // Güncelle
+            if (islemTipi === "giris") {
+                parca.stokAdet += adet;
+            } else if (islemTipi === "cikis") {
+                parca.stokAdet -= adet;
+            }
+            notif.textContent = `Stok güncellendi. Yeni stok miktarı: ${parca.stokAdet}`;
+            notif.className = "notification";
+
+            // Güncellenen stok bilgisi select içeriğini de yenile
+            selectParca.querySelectorAll("option").forEach(opt => {
+                if (parseInt(opt.value) === parca.id) {
+                    opt.textContent = parca.isim + " (Stok: " + parca.stokAdet + ")";
+                }
+            });
+
+            // Ayrıca Stok Takip tablosu otomatik güncellensin (aktif ise)
+            if (document.querySelector("nav button.active").dataset.section === "stokTakip") {
+                renderStokTakip();
+            }
+        });
+    }
+
+    // Üretim Parçaları Gönderimi Bölümü (simüle edilmiş veri kullanıyor)
+    function renderUretimParcalari() {
+        clearContent();
+        const title = document.createElement("h2");
+        title.textContent = "Üretimde Gerekli Parçalar";
+        mainContent.appendChild(title);
+
+        if (uretimParcalari.length === 0) {
+            const info = document.createElement("p");
+            info.textContent = "Şu an üretimde gerekli parça bilgisi bulunmamaktadır.";
+            mainContent.appendChild(info);
+            return;
+        }
+
+        // Ürün Bazlı Parça Listesi Tablosu
+        const headers = ["Ürün", "Parça ID", "Parça Adı", "Gerekli Adet"];
+        const rows = uretimParcalari.map(p => [p.urun, p.parcaId, p.parcaAdi, p.adet]);
+        mainContent.appendChild(createTable(headers, rows));
+
+        const info = document.createElement("p");
+        info.textContent = "Yukarıdaki parçalar üretime iletilmiştir.";
+        info.style.marginTop = "1rem";
+        info.style.fontWeight = "600";
+        mainContent.appendChild(info);
+    }
+
+    // Menü butonlarına tıklamayla sayfa değişimi
+    const navButtons = document.querySelectorAll("nav button");
+    navButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            navButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const section = btn.dataset.section;
+            // Menü tıklamalarında ilgili render fonksiyonunu çağır
+            switch(section) {
+                case "stokTakip":
+                    renderStokTakip();
+                    break;
+                case "tedarikPlanlama":
+                    renderTedarikPlanlama();
+                    break;
+                case "lojistikPlanlama":
+                    renderLojistikPlanlama();
+                    break;
+                case "uretimRapor":
+                    renderUretimRapor();
+                    break;
+                case "stokGuncelleme":
+                    renderStokGuncelleme();
+                    break;
+                case "uretimParcalari":
+                    renderUretimParcalari();
+                    break;
+                default:
+                    clearContent();
+                    break;
+            }
+        });
+    });
+
+    // Sayfa yüklendiğinde login ekranı gösteriliyor veya ana uygulamaya yönlendiriliyor
+    window.addEventListener("DOMContentLoaded", () => {
+        const storedToken = localStorage.getItem('access_token');
+        if (storedToken) {
+            accessToken = storedToken;
+            // Token'ın geçerliliğini kontrol eden bir API çağrısı yapılabilir
+            // Ancak şimdilik doğrudan ana uygulamayı gösterelim
+            showMainApp();
+        } else {
+            showLoginScreen();
+        }
+    });
+    </script>
 </body>
 </html>
+
