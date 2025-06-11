@@ -1,4 +1,13 @@
 # src_backend/main.py
+# src_backend/main.py
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
+# src_backend paketinin içindeki database modülünü içe aktar
+from src_backend.database import connect_db
+
+# src_backend paketinin içindeki api.product_routes modülünü içe aktar
+from src_backend.api.product_routes import router as product_router
 
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse

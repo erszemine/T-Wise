@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv() # .env dosyasındaki değişkenleri yükle
 
 # MongoDB 
-DATABASE_URL = os.getenv("DATABASE_URL") # Bu artık .env'den çekilecek
+MONGO_URI = os.getenv("MONGO_URI") # Bu artık .env'den çekilecek
 MONGO_DATABASE_NAME = os.getenv("MONGO_DATABASE_NAME", "stock_management_db") # .env'den çekilir, yoksa varsayılan
 
 # JWT 

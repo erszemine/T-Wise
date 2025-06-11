@@ -32,6 +32,7 @@ class Product(Document):
 
     class Settings:
         name = "products" # MongoDB koleksiyon adının "products" olduğundan emin olun
+        keep_updated = True # Bu, Beanie'nin updated_at gibi alanları otomatik güncellemesine yardımcı olur
         # Beanie 1.x ve üzeri için varsayılan "_id" alanını otomatik olarak tanır.
         # Bu yüzden `id: PydanticObjectId` gibi bir tanıma gerek yoktur.
         # Ancak ProductResponse şemasında bunu "id" olarak aliaslamak gerekir.

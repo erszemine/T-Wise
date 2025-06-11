@@ -5,11 +5,15 @@ from beanie import init_beanie, Document
 from dotenv import load_dotenv
 from typing import List, Type
 
-# Modelleri buraya import edin
-from models_entity.Product import Product
-from models_entity.Stock import Stock
-from models_entity.StockMovement import StockMovement
-from models_entity.User import User
+# src_backend paketinin içindeki models_entity altından
+from src_backend.models_entity.Product import Product
+from src_backend.models_entity.Stock import Stock
+from src_backend.models_entity.StockMovement import StockMovement
+from src_backend.models_entity.User import User
+
+# src_backend paketinin içindeki config modülünden
+from src_backend.config import MONGO_URI, MONGO_DATABASE_NAME # NOT: config.py'de DATABASE_URL yerine MONGO_URI kullanıldığını varsayıyorum
+
 # from models_entity.UretimTalebi import UretimTalebi # Üretim talebi kullanılmayacağı için yorum satırı yapıldı veya silindi
 
 load_dotenv() # .env dosyasını yükle
