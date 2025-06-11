@@ -3,9 +3,9 @@ from beanie import PydanticObjectId
 from typing import List, Optional
 from datetime import datetime
 
-from ..models.stock_movement import StockMovement
-from ..models.product import Product # Product modelini import edin
-from ..models.user import User # User modelini import edin
+from models_entity.StockMovement import StockMovement
+from models_entity.Product import Product # Product modelini import edin
+from models_entity.User import User # User modelini import edin
 
 class StockMovementRepository:
     async def create_movement(self, product_id: PydanticObjectId, 

@@ -3,7 +3,7 @@ from beanie import PydanticObjectId
 from typing import List, Optional
 from datetime import datetime
 
-from ..models.User import User # User modelini import edin
+from models_entity.User import User # User modelini import edin
 
 class UserRepository:
     """
