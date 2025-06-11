@@ -1,12 +1,14 @@
 # src_backend/main.py
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import os
 from typing import Optional
-from pydantic import BaseModel, Field
-from datetime import timedelta, timezone
+from pydantic import BaseModel, Field, ValidationError
+from datetime import timedelta, timezone, datetime # datetime import edildi
+
 
 # --- Pydantic Request/Response Modelleri (Login/Register için) ---
 # BU MODELLER DİĞER KÜTÜPHANE İMPORTLARINDAN VE FastAPI UYGULAMASI TANIMINDAN ÖNCE OLMALIDIR.
@@ -26,12 +28,12 @@ class UserRegister(BaseModel):
     email: Optional[str] = None
     role: str = "Depo Sorumlusu" # Varsayılan rol
 
-# Veritabanı bağlantısı
+# Veritabanı bağlantısı (database.py dosyasından connect_db fonksiyonu)
 from database import connect_db
 
 # Güvenlik ve kullanıcı modelleri
 from security import create_access_token, authenticate_user, hash_password, get_current_user
-from models_entity.User import User # Sadece User modelini import edin, UserLogin ve UserRegister burada tanımlı.
+from models_entity.User import User
 from beanie import PydanticObjectId
 
 # API Router'larını import edin
@@ -46,11 +48,11 @@ from api.user_routes import router as user_router
 async def lifespan(app: FastAPI):
     print("Uygulama başlıyor...")
     try:
-        await connect_db()
+        await connect_db() 
         print("MongoDB bağlantısı başarılı.")
     except Exception as e:
         print(f"MongoDB bağlantı hatası: {e}")
-        # raise Exception(f"Veritabanı bağlantı hatası: {e}")
+        raise RuntimeError(f"Veritabanı bağlantısı kurulamadı: {e}") 
 
     yield
 
@@ -59,10 +61,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="T-Wise Basit Envanter Yönetim Sistemi API",
+    title="T-Wise Depo ve Stok Yönetim Sistemi API",
     description="FastAPI ve MongoDB ile geliştirilmiş basit envanter takip sistemi.",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # CORS Middleware
@@ -78,7 +82,7 @@ app.add_middleware(
 
 # Login Endpoint
 @app.post("/api/token", response_model=Token, summary="Kullanıcı girişi ve token alma")
-async def login_for_access_token(user_login: UserLogin): # Bu satırda UserLogin kullanılır
+async def login_for_access_token(user_login: UserLogin):
     user = await authenticate_user(user_login.username, user_login.password)
     if not user:
         raise HTTPException(
@@ -97,10 +101,15 @@ async def login_for_access_token(user_login: UserLogin): # Bu satırda UserLogin
 
 # Kullanıcı Kayıt Endpoint
 @app.post("/api/register", status_code=status.HTTP_201_CREATED, summary="Yeni kullanıcı kaydı")
-async def register_user(user_register: UserRegister): # Bu satırda UserRegister kullanılır
+async def register_user(user_register: UserRegister):
     existing_user = await User.find_one(User.username == user_register.username)
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Kullanıcı adı zaten mevcut")
+
+    if user_register.email:
+        existing_email_user = await User.find_one(User.email == user_register.email)
+        if existing_email_user:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="E-posta adresi zaten kullanımda")
 
     hashed_password = hash_password(user_register.password)
     new_user = User(
@@ -109,18 +118,42 @@ async def register_user(user_register: UserRegister): # Bu satırda UserRegister
         full_name=user_register.full_name,
         email=user_register.email,
         role=user_register.role,
-        is_active=True
+        is_active=True,
+        created_at=datetime.utcnow() # created_at eklendi
     )
     await new_user.insert()
-    return {"username": new_user.username, "message": "User registered successfully, please login."}
+    return {"username": new_user.username, "message": "Kullanıcı başarıyla kaydedildi, lütfen giriş yapın."}
+
 
 # --- Router'ları Uygulamaya Dahil Et ---
-app.include_router(product_router, prefix="/api/products", tags=["Products"])
-app.include_router(stock_router, prefix="/api/stocks", tags=["Stocks"])
-app.include_router(stock_management_router, prefix="/api/stock-management", tags=["Stock Management"])
-app.include_router(user_router, prefix="/api/users", tags=["Users"])
+app.include_router(product_router)
+app.include_router(stock_router)
+app.include_router(stock_management_router)
+app.include_router(user_router)
 
 # Varsayılan kök endpoint
-@app.get("/")
+@app.get("/", summary="API'nin ana kök dizini")
 async def read_root():
     return {"message": "T-Wise Depo ve Stok Yönetim Sistemi API'sine hoş geldiniz!"}
+
+# --- Global Hata Yakalayıcılar ---
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": exc.detail},
+    )
+
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request: Request, exc: ValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"message": "Doğrulama Hatası", "details": exc.errors()},
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": "Sunucu hatası oluştu.", "detail": str(exc)},
+    )
