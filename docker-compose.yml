@@ -1,16 +1,17 @@
-version: '3.8'
+
 
 services:
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./src_backend # Dockerfile'ın ve backend kodlarının bulunduğu dizin
+      dockerfile: Dockerfile # Context içinde Dockerfile'ı arayacak
     ports:
       - "8000:8000" # FastAPI uygulamasının çalıştığı port
     volumes:
-      - ./src_backend:/app/src_backend # Kodunuzun maplendiği yer
+      - ./src_backend:/app/src_backend # Backend kodlarının konteyner içine maplenmesi
+      - ./.env:/app/.env               # .env dosyasının konteynerin /app dizinine maplenmesi
     env_file:
-      - ./src_backend/.env # .env dosyasını eklediğiniz yer
+      - ./.env # .env dosyasını eklediğiniz yer
     depends_on:
       - mongodb_container
     networks:
