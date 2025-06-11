@@ -1,11 +1,14 @@
 # src_backend/schemas/product_schemas.py
-
+from beanie import PydanticObjectId 
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 
 # Base Product Schema - Diğer şemalar için temel sağlar
 class ProductBase(BaseModel):
+    id: str = Field(..., alias="_id", description="Ürünün veritabanı kimliği.")
+    created_at: datetime = Field(..., description="Ürünün oluşturulma tarihi ve saati.")
+    updated_at: datetime = Field(..., description="Ürünün son güncellenme tarihi ve saati.")
     name: str = Field(..., min_length=2, max_length=100, description="Ürünün veya parçanın adı.")
     code: str = Field(..., min_length=2, max_length=50, description="Ürünün veya parçanın benzersiz kodu.")
     description: Optional[str] = Field(None, max_length=500, description="Ürünün kısa açıklaması.")
@@ -19,6 +22,12 @@ class ProductBase(BaseModel):
     is_active: bool = Field(True, description="Ürünün aktif olup olmadığı.")
 
     class Config:
+        populate_by_name = True
+        json_encoders = {
+            PydanticObjectId: str, # ObjectId'yi string'e çevirir
+            datetime: lambda v: v.isoformat() + "Z" # datetime objesini ISO formatına çevirir ve Z (UTC) ekler
+        }
+
         json_schema_extra = {
             "example": {
                 "name": "Ön Fren Balatası",
