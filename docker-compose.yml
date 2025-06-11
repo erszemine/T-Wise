@@ -22,9 +22,9 @@ services:
     container_name: mongodb_container
     ports:
       - "27017:27017" # MongoDB'nin varsayılan portu
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    #environment:
+      #MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      #MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - t-wise_mongo_data:/data/db # Verilerin kalıcı depolanması için
     networks:

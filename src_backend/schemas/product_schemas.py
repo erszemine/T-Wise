@@ -27,7 +27,7 @@ class ProductBase(BaseModel):
             PydanticObjectId: str, # ObjectId'yi string'e çevirir
             datetime: lambda v: v.isoformat() + "Z" # datetime objesini ISO formatına çevirir ve Z (UTC) ekler
         }
-
+"""
         json_schema_extra = {
             "example": {
                 "name": "Ön Fren Balatası",
@@ -43,7 +43,7 @@ class ProductBase(BaseModel):
                 "is_active": True
             }
         }
-
+"""
 # Product creation schema - Yeni ürün oluşturulurken kullanılır
 class ProductCreate(ProductBase):
     pass # ProductBase'deki tüm alanlar yeterlidir
@@ -71,24 +71,7 @@ class ProductResponse(ProductBase):
 
     class Config:
         populate_by_name = True # _id alanını id olarak kullanmamızı sağlar
-        """json_schema_extra = {
-            "example": {
-                "id": "60c72b2f9f1b2c3d4e5f6a7b", # Örnek ObjectId
-                "name": "Ön Fren Balatası",
-                "code": "FREN-BALATA-001",
-                "description": "Yüksek performanslı seramik ön fren balatası.",
-                "unit": "Takım",
-                "category": "Fren Sistemi",
-                "purchase_price": 300.00,
-                "sale_price": 450.00,
-                "current_stock": 50,
-                "minimum_stock": 10,
-                "reorder_point": 15,
-                "is_active": True,
-                "created_at": "2023-01-15T10:30:00.000Z",
-                "updated_at": "2023-01-15T10:30:00.000Z"
-            }
-        }"""
+        
 
 # API response for a list of products
 class ProductListResponse(BaseModel):
@@ -96,26 +79,4 @@ class ProductListResponse(BaseModel):
     total_count: int
 
     class Config:
-        """json_schema_extra = {
-            "example": {
-                "products": [
-                    {
-                        "id": "60c72b2f9f1b2c3d4e5f6a7b",
-                        "name": "Ön Fren Balatası",
-                        "code": "FREN-BALATA-001",
-                        "description": "Yüksek performanslı seramik ön fren balatası.",
-                        "unit": "Takım",
-                        "category": "Fren Sistemi",
-                        "purchase_price": 300.00,
-                        "sale_price": 450.00,
-                        "current_stock": 50,
-                        "minimum_stock": 10,
-                        "reorder_point": 15,
-                        "is_active": True,
-                        "created_at": "2023-01-15T10:30:00.000Z",
-                        "updated_at": "2023-01-15T10:30:00.000Z"
-                    }
-                ],
-                "total_count": 1
-            }
-        }"""
+       
