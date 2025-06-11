@@ -1,4 +1,4 @@
-"""# src/stok_yonetim_backend/schemas/stock_movement_schemas.py
+# src/stok_yonetim_backend/schemas/stock_movement_schemas.py
 from pydantic import BaseModel, Field
 from beanie import PydanticObjectId
 from datetime import datetime
@@ -29,4 +29,4 @@ class StockMovementResponse(BaseModel):
                 }
             ]
         }
-    }"""
+    }
