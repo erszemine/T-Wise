@@ -79,4 +79,4 @@ class ProductListResponse(BaseModel):
     total_count: int
 
     class Config:
-       
+       pass

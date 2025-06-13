@@ -5,7 +5,7 @@ from beanie import PydanticObjectId
 from typing import List, Optional
 from datetime import datetime
 
-from src_backend.models_entity.Product import Product  # veritabanı modeli
+from models_entity.Product import Product  # veritabanı modeli
 from schemas.product_schemas import ProductCreate, ProductResponse, ProductUpdate, ProductListResponse # Yeni şemalarımızı import ettik
 # from security import get_current_user # Eğer kimlik doğrulama eklemek isterseniz bu satırı yorumdan çıkarın
 
