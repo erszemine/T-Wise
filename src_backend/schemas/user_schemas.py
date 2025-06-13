@@ -11,7 +11,7 @@ class UserCreate(BaseModel):
     email: Optional[EmailStr] = Field(None, description="Kullanıcının e-posta adresi")
     first_name: Optional[str] = Field(None, max_length=50, description="Kullanıcının adı")
     last_name: Optional[str] = Field(None, max_length=50, description="Kullanıcının soyadı")
-    role: Optional[str] = Field("user", description="Kullanıcının rolü (örn: admin, manager, user)") # Varsayılan rol
+    position: Optional[str] = Field("user", description="Kullanıcının rolü (örn: admin, manager, user)") # Varsayılan rol
 
     # password_hash alanı, API'ye gelen isteklerde beklenmez,
     # backend tarafında şifre hash'lendikten sonra atanır.

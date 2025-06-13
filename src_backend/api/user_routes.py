@@ -18,9 +18,10 @@ class UserResponse(User):
         populate_by_name = True
 
 class UserUpdate(BaseModel):
-    full_name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     email: Optional[str] = None
-    role: Optional[str] = None
+    position: Optional[str] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None # Kullanıcı aktiflik durumunu güncellemek için
 

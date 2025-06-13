@@ -23,9 +23,11 @@ class UserLogin(BaseModel):
 class UserRegister(BaseModel):
     username: str
     password: str
-    full_name: str
+    # full_name yerine first_name ve last_name
+    first_name: str
+    last_name: str
     email: Optional[str] = None
-    role: str = "Depo Sorumlusu" # Varsayılan rol
+    position: str = "Depo Sorumlusu" # Varsayılan rol
 
 # Veritabanı bağlantısı (database.py dosyasından connect_db fonksiyonu)
 from database import connect_db
@@ -119,9 +121,10 @@ async def register_user(user_register: UserRegister):
     new_user = User(
         username=user_register.username,
         password_hash=hashed_password,
-        full_name=user_register.full_name,
+        first_name=user_register.first_name,
+        last_name=user_register.last_name,
         email=user_register.email,
-        role=user_register.role,
+        position=user_register.position,
         is_active=True,
         created_at=datetime.utcnow() # created_at eklendi
     )
