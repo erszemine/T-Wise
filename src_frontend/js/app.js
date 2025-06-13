@@ -1,11 +1,14 @@
 // frontend/src/js/app.js
 import { createTable } from './components/tableRenderer.js';
 import { api } from './api.js';
-import { showLoginScreen, setUiCallbacks } from './auth.js';
+import { showLoginScreen, setUiCallbacks } from './auth.js'; // showLoginScreen'i import ediyoruz
 
 // DOM referansları
 const mainContent = document.getElementById("mainContent");
 const navButtons = document.querySelectorAll("nav button");
+const loginScreen = document.getElementById("loginScreen"); // auth.js kullanıyor ama burada da ihtiyacımız var
+const nav = document.querySelector("nav"); // auth.js kullanıyor ama burada da ihtiyacımız var
+const logoutBtn = document.getElementById("logoutBtn"); // auth.js kullanıyor ama burada da ihtiyacımız var
 
 // Demo verileri (şimdilik, daha sonra API'den çekilecek)
 let parcalar = []; // API'den gelecek
@@ -14,80 +17,102 @@ let lojistikPlan = []; // API'den gelecek
 let uretimRaporlari = []; // API'den gelecek
 let uretimParcalari = []; // API'den gelecek
 
-
 function clearContent() {
     mainContent.innerHTML = "";
 }
 
+// AUTH CALLBACKS - Auth.js'ye gönderilecek fonksiyonlar
+async function showMainApp() {
+    loginScreen.style.display = "none";
+    nav.style.display = "flex";
+    mainContent.style.display = "block";
+    logoutBtn.style.display = "inline-block";
+    await renderStokTakip(); // Ana uygulamayı başlatırken stok takibini API'den çek
+    // İlk butonu aktif yap
+    if (navButtons.length > 0) {
+        navButtons[0].classList.add("active");
+    }
+}
+
+// auth.js'ye callback fonksiyonlarını gönderiyoruz
+setUiCallbacks(showMainApp, showLoginScreen);
+
+
 // Data fetching functions
 async function fetchStokItems() {
     try {
-        parcalar = await api.getStockItems(); // Backend'den ürün/parça stoklarını çeker
+        // API'den gelen cevap { products: [], total_count: X } formatında olabilir
+        const response = await api.getStockItems(); 
+        // Eğer response.products varsa onu, yoksa response'u direkt parcalar'a atayın
+        parcalar = response.products || response; 
     } catch (error) {
         console.error("Stok bilgileri çekilemedi:", error);
-        if (error.message === "Unauthorized or Forbidden") {
+        if (error.message.includes("Unauthorized") || error.message.includes("Forbidden")) { // 'includes' ile daha genel kontrol
             showLoginScreen(); // Yetki hatası durumunda login ekranına yönlendir
         }
         parcalar = []; // Hata durumunda boş liste
         const notif = document.createElement('div');
         notif.className = 'notification error';
-        notif.textContent = 'Stok bilgileri yüklenirken bir hata oluştu.';
+        notif.textContent = `Stok bilgileri yüklenirken bir hata oluştu: ${error.message}`;
         mainContent.appendChild(notif);
     }
 }
 
 async function fetchTedarikList() {
     try {
-        tedarikListesi = await api.getTedarikList();
+        const response = await api.getTedarikList();
+        tedarikListesi = response.items || response; // API cevabına göre uyarlayın
     } catch (error) {
         console.error("Tedarik listesi çekilemedi:", error);
         tedarikListesi = [];
         const notif = document.createElement('div');
         notif.className = 'notification error';
-        notif.textContent = 'Tedarik listesi yüklenirken bir hata oluştu.';
+        notif.textContent = `Tedarik listesi yüklenirken bir hata oluştu: ${error.message}`;
         mainContent.appendChild(notif);
     }
 }
 
 async function fetchLojistikPlan() {
     try {
-        lojistikPlan = await api.planLogistics(); // API'den gelen planlama verisi
+        const response = await api.planLogistics(); 
+        lojistikPlan = response.plans || response; // API cevabına göre uyarlayın
     } catch (error) {
         console.error("Lojistik plan çekilemedi:", error);
         lojistikPlan = [];
         const notif = document.createElement('div');
         notif.className = 'notification error';
-        notif.textContent = 'Lojistik plan yüklenirken bir hata oluştu.';
+        notif.textContent = `Lojistik plan yüklenirken bir hata oluştu: ${error.message}`;
         mainContent.appendChild(notif);
     }
 }
 
 async function fetchUretimRaporlari() {
     try {
-        uretimRaporlari = await api.getProductionReports();
+        const response = await api.getProductionReports();
+        uretimRaporlari = response.reports || response; // API cevabına göre uyarlayın
     } catch (error) {
         console.error("Üretim raporları çekilemedi:", error);
         uretimRaporlari = [];
         const notif = document.createElement('div');
         notif.className = 'notification error';
-        notif.textContent = 'Üretim raporları yüklenirken bir hata oluştu.';
+        notif.textContent = `Üretim raporları yüklenirken bir hata oluştu: ${error.message}`;
         mainContent.appendChild(notif);
     }
 }
 
 async function fetchUretimParcalari() {
     try {
-        uretimParcalari = await api.getRequiredProductionParts(); // Varsayılan endpoint
+        const response = await api.getRequiredProductionParts(); // Varsayılan endpoint
+        uretimParcalari = response.parts || response; // API cevabına göre uyarlayın
     } catch (error) {
         console.error("Üretim parçaları çekilemedi:", error);
         uretimParcalari = [];
         const notif = document.createElement('div');
         notif.className = 'notification error';
-        notif.textContent = 'Üretim parçaları yüklenirken bir hata oluştu.';
+        notif.textContent = `Üretim parçaları yüklenirken bir hata oluştu: ${error.message}`;
         mainContent.appendChild(notif);
     }
 }
-
 
 // --- Bölüm Render Fonksiyonları ---
 
@@ -99,9 +124,13 @@ export async function renderStokTakip() {
 
     await fetchStokItems(); // API'den veriyi çek
     const headers = ['Parça ID', 'Parça Adı', 'Stok Adedi'];
-    // API'den gelen veriye göre map'leme yapın
     const rows = parcalar.map(p => [p.id, p.name, p.quantity]); 
     mainContent.appendChild(createTable(headers, rows));
+    if (parcalar.length === 0) {
+        const info = document.createElement("p");
+        info.textContent = "Şu an stokta hiç ürün bulunmamaktadır.";
+        mainContent.appendChild(info);
+    }
 }
 
 export async function renderTedarikPlanlama() {
@@ -221,18 +250,18 @@ export async function renderStokGuncelleme() {
 
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
-        const parcaId = parseInt(selectParca.value);
+        const parcaId = selectParca.value ? parseInt(selectParca.value) : null;
         const islemTipi = selectIslem.value;
         const adet = parseInt(inputAdet.value);
         const parca = parcalar.find(p => p.id === parcaId);
 
-        if (!parca || isNaN(adet) || adet <= 0) {
-            notif.textContent = "Lütfen geçerli bir seçim yapınız.";
+        if (!parcaId || isNaN(adet) || adet <= 0 || !parca) { // parca kontrolü de eklendi
+            notif.textContent = "Lütfen geçerli bir seçim yapınız ve adet giriniz.";
             notif.className = "notification error";
             return;
         }
 
-        if (islemTipi === "EXIT" && adet > parca.quantity) { // 'quantity' olarak güncellendi
+        if (islemTipi === "EXIT" && adet > parca.quantity) { 
             notif.textContent = "Çıkış yapmak için yeterli stok yok!";
             notif.className = "notification error";
             return;
@@ -243,7 +272,7 @@ export async function renderStokGuncelleme() {
             const response = await api.updateStock(parcaId, 1, adet, islemTipi, `${islemTipi.toLowerCase()} işlemi`); // Varsayılan warehouseId: 1
             notif.textContent = response.message || "Stok başarıyla güncellendi.";
             notif.className = "notification";
-            
+
             // UI'ı güncelle
             if (islemTipi === "ENTRY") {
                 parca.quantity += adet;
@@ -285,7 +314,7 @@ export async function renderUretimParcalari() {
     }
 
     const headers = ["Ürün", "Parça ID", "Parça Adı", "Gerekli Adet"];
-    const rows = uretimParcalari.map(p => [p.product_name, p.part_id, p.part_name, p.required_quantity]); // API'den gelen verilere göre uyarlanacak
+    const rows = uretimParcalari.map(p => [p.product_name, p.part_id, p.part_name, p.required_quantity]); 
     mainContent.appendChild(createTable(headers, rows));
 
     const info = document.createElement("p");
@@ -325,4 +354,9 @@ navButtons.forEach(btn => {
                 break;
         }
     });
+});
+
+// Sayfa yüklendiğinde oturum kontrolünü başlat
+window.addEventListener("DOMContentLoaded", () => {
+    auth.checkAuthStatus(); // auth.js'den oturum kontrolünü çağır
 });

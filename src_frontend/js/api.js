@@ -1,5 +1,6 @@
 // frontend/src/js/api.js
-const API_BASE_URL = "https://reimagined-space-dollop-4j6qpgx9jqprfq4pr-8000.app.github.dev/"; // Backend adresiniz buraya geldi
+// API_BASE_URL'in sonundaki '/' işaretini kaldırdık, endpoint'lerde '/' kullanacağız
+const API_BASE_URL = "https://reimagined-space-dollop-4j6pgx9jqprfq4pr-8000.app.github.dev"; // Backend adresiniz buraya geldi (SONUNDAKİ '/' İŞARETİNİ KONTROL EDİN)
 
 // Helper function to get JWT token from localStorage
 function getAuthToken() {
@@ -36,7 +37,8 @@ async function fetchWithAuth(url, options = {}) {
 // API Çağrıları (Örnekler)
 export const api = {
     login: async (username, password) => {
-        const response = await fetch(`${API_BASE_URL}/token`, {
+        // '/token' endpoint'i için URLSearchParams kullanıyoruz
+        const response = await fetch(`${API_BASE_URL}/api/token`, { // /api/token olarak düzelttik
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -50,16 +52,17 @@ export const api = {
         return response.json();
     },
 
+    // Düzeltmeler: Ters tırnak (`) kullanıldı ve '/api' öneki eklendi
     getStockItems: async () => {
-        return fetchWithAuth('${API_BASE_URL}/stock/items'); // Örnek endpoint
+        return fetchWithAuth(`${API_BASE_URL}/api/products`); // /api/products olarak düzeltildi
     },
 
     getTedarikList: async () => {
-        return fetchWithAuth('${API_BASE_URL}/supply/planning'); // Örnek endpoint
+        return fetchWithAuth(`${API_BASE_URL}/api/supply/planning`); // Örnek endpoint, '/api' eklendi
     },
 
     updateStock: async (productId, warehouseId, quantity, movementType, description) => {
-        return fetchWithAuth(`${API_BASE_URL}/stock/update`, {
+        return fetchWithAuth(`${API_BASE_URL}/api/stock/update`, { // '/api' eklendi
             method: 'POST',
             body: JSON.stringify({ product_id: productId, warehouse_id: warehouseId, quantity: quantity, movement_type: movementType, description: description })
         });
@@ -67,37 +70,37 @@ export const api = {
 
     // Diğer API çağrıları buraya eklenecek (lojistik, üretim raporları vb.)
     getProductionReports: async () => {
-        return fetchWithAuth('${API_BASE_URL}/production/reports');
+        return fetchWithAuth(`${API_BASE_URL}/api/production/reports`); // '/api' eklendi
     },
     
     getRequiredProductionParts: async () => {
-        return fetchWithAuth('${API_BASE_URL}/production/required-parts');
+        return fetchWithAuth(`${API_BASE_URL}/api/production/required-parts`); // '/api' eklendi
     },
 
     // Yeni eklenen servis metodlarına karşılık gelen API endpoint'leri
     checkPartStatus: async (productId, requiredQuantity) => {
-        return fetchWithAuth(`${API_BASE_URL}/stock/check-part-status`, {
+        return fetchWithAuth(`${API_BASE_URL}/api/stock/check-part-status`, { // '/api' eklendi
             method: 'POST',
             body: JSON.stringify({ product_id: productId, required_quantity: requiredQuantity })
         });
     },
     procureMissingParts: async (productId, missingQuantity) => {
-        return fetchWithAuth(`${API_BASE_URL}/supply/procure-missing-parts`, {
+        return fetchWithAuth(`${API_BASE_URL}/api/supply/procure-missing-parts`, { // '/api' eklendi
             method: 'POST',
             body: JSON.stringify({ product_id: productId, missing_quantity: missingQuantity })
         });
     },
     planLogistics: async (productId, quantity, deliveryDate) => {
-        return fetchWithAuth(`${API_BASE_URL}/logistics/plan`, {
+        return fetchWithAuth(`${API_BASE_URL}/api/logistics/plan`, { // '/api' eklendi
             method: 'POST',
             body: JSON.stringify({ product_id: productId, quantity: quantity, delivery_date: deliveryDate })
         });
     },
     reportUpcomingProducts: async () => {
-        return fetchWithAuth('${API_BASE_URL}/production/upcoming-products-report');
+        return fetchWithAuth(`${API_BASE_URL}/api/production/upcoming-products-report`); // '/api' eklendi
     },
     deliverPartsToProduction: async (productId, warehouseId, quantity) => {
-        return fetchWithAuth(`${API_BASE_URL}/stock/deliver-to-production`, {
+        return fetchWithAuth(`${API_BASE_URL}/api/stock/deliver-to-production`, { // '/api' eklendi
             method: 'POST',
             body: JSON.stringify({ product_id: productId, warehouse_id: warehouseId, quantity: quantity })
         });

@@ -16,7 +16,9 @@ export function createTable(headers, rows) {
         const tr = document.createElement("tr");
         row.forEach(cell => {
             const td = document.createElement("td");
-            td.textContent = cell;
+            // Eğer hücre içeriği bir objeyse ve 'name' özelliği varsa, 'name'ini göster. Aksi takdirde stringe çevir.
+            const cellContent = (typeof cell === 'object' && cell !== null && 'name' in cell) ? cell.name : String(cell);
+            td.textContent = cellContent;
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
