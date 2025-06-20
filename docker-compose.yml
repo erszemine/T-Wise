@@ -1,0 +1,38 @@
+
+
+services:
+  backend:
+    build:
+      context: ./src_backend # Dockerfile'ın ve backend kodlarının bulunduğu dizin
+      dockerfile: Dockerfile # Context içinde Dockerfile'ı arayacak
+    ports:
+      - "8000:8000" # FastAPI uygulamasının çalıştığı port
+    volumes:
+      - ./src_backend:/app/src_backend # Backend kodlarının konteyner içine maplenmesi
+      - ./.env:/app/.env               # .env dosyasının konteynerin /app dizinine maplenmesi
+    env_file:
+      - ./.env # .env dosyasını eklediğiniz yer
+    depends_on:
+      - mongodb_container
+    networks:
+      - t-wise_default
+
+  mongodb_container:
+    image: mongo:latest
+    container_name: mongodb_container
+    ports:
+      - "27017:27017" # MongoDB'nin varsayılan portu
+    #environment:
+      #MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      #MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - t-wise_mongo_data:/data/db # Verilerin kalıcı depolanması için
+    networks:
+      - t-wise_default
+
+volumes:
+  t-wise_mongo_data:
+
+networks:
+  t-wise_default:
+    # Buraya network detayları eklenebilir, varsayılan olarak köprüdür
