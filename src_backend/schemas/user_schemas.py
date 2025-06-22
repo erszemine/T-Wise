@@ -1,4 +1,3 @@
-# src/stok_yonetim_backend/schemas/user_schemas.py
 from pydantic import BaseModel, Field, EmailStr
 from beanie import PydanticObjectId # MongoDB ObjectID'leri için Pydantic uyumlu tip
 from typing import Optional, List
@@ -11,13 +10,10 @@ class UserCreate(BaseModel):
     email: Optional[EmailStr] = Field(None, description="Kullanıcının e-posta adresi")
     first_name: Optional[str] = Field(None, max_length=50, description="Kullanıcının adı")
     last_name: Optional[str] = Field(None, max_length=50, description="Kullanıcının soyadı")
-    position: Optional[str] = Field("user", description="Kullanıcının rolü (örn: admin, manager, user)") # Varsayılan rol
+    position: Optional[str] = Field("user", description="Kullanıcının pozisyonu (örn: Yönetici, Çalışan, Depo Sorumlusu)") # role yerine position
 
-    # password_hash alanı, API'ye gelen isteklerde beklenmez,
-    # backend tarafında şifre hash'lendikten sonra atanır.
-    # Bu yüzden Pydantic modelinde var ama isteğe bağlı ve varsayılanı yok.
-    password_hash: Optional[str] = None 
-
+    password_hash: Optional[str] = None
+    
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -27,25 +23,21 @@ class UserCreate(BaseModel):
                     "email": "newuser@example.com",
                     "first_name": "Ayşe",
                     "last_name": "Yılmaz",
-                    "role": "user"
+                    "position": "user" # role yerine position
                 }
             ]
         }
     }
 
 # Kullanıcı güncellemek için gelen istek gövdesinin şeması (PUT /users/{id} veya PATCH /users/{id})
-# Tüm alanlar Optional olmalı.
 class UserUpdate(BaseModel):
     username: Optional[str] = Field(None, min_length=3, max_length=50, description="Güncellenmiş kullanıcı adı")
     password: Optional[str] = Field(None, min_length=6, description="Yeni şifre (isteğe bağlı)")
     email: Optional[EmailStr] = Field(None, description="Güncellenmiş e-posta adresi")
     first_name: Optional[str] = Field(None, max_length=50, description="Güncellenmiş adı")
     last_name: Optional[str] = Field(None, max_length=50, description="Güncellenmiş soyadı")
-    role: Optional[str] = Field(None, description="Güncellenmiş rol")
+    position: Optional[str] = Field(None, description="Güncellenmiş pozisyon") # role yerine position
     is_active: Optional[bool] = Field(None, description="Kullanıcının aktiflik durumu")
-
-    # password_hash alanı, API'ye gelen isteklerde beklenmez.
-    password_hash: Optional[str] = None 
 
     model_config = {
         "json_schema_extra": {
@@ -59,14 +51,13 @@ class UserUpdate(BaseModel):
     }
 
 # API'den kullanıcı bilgilerini dönerken kullanılan şema (GET, POST, PUT yanıtları)
-# Şifre hash'i gibi hassas bilgiler döndürülmez.
 class UserResponse(BaseModel):
     id: PydanticObjectId = Field(..., alias="_id", description="Kullanıcının MongoDB ID'si")
     username: str = Field(description="Kullanıcı adı")
     email: Optional[EmailStr] = Field(None, description="Kullanıcının e-posta adresi")
     first_name: Optional[str] = Field(None, description="Kullanıcının adı")
     last_name: Optional[str] = Field(None, description="Kullanıcının soyadı")
-    role: str = Field(description="Kullanıcının rolü")
+    position: str = Field(description="Kullanıcının pozisyonu") # role yerine position
     is_active: bool = Field(description="Kullanıcının aktiflik durumu")
     created_at: datetime = Field(description="Kullanıcının oluşturulma tarihi")
     updated_at: datetime = Field(description="Kullanıcının son güncellenme tarihi")
@@ -81,7 +72,7 @@ class UserResponse(BaseModel):
                     "email": "admin@example.com",
                     "first_name": "Can",
                     "last_name": "Demir",
-                    "role": "admin",
+                    "position": "Yönetici", # role yerine position
                     "is_active": True,
                     "created_at": "2023-01-01T10:00:00.000Z",
                     "updated_at": "2023-01-01T10:00:00.000Z"
@@ -90,14 +81,14 @@ class UserResponse(BaseModel):
         }
     }
 
-# Kullanıcının rolünü güncellemek için özel şema (PATCH /users/{id}/role)
-class UserRoleUpdate(BaseModel):
-    role: str = Field(..., description="Kullanıcının yeni rolü (örn: admin, manager, user)")
+# Kullanıcının pozisyonunu güncellemek için özel şema (PATCH /users/{id}/position)
+class UserPositionUpdate(BaseModel): # UserRoleUpdate yerine UserPositionUpdate yaptım
+    position: str = Field(..., description="Kullanıcının yeni pozisyonu (örn: Yönetici, Çalışan, Depo Sorumlusu)") # role yerine position
 
     model_config = {
         "json_schema_extra": {
             "examples": [
-                {"role": "manager"}
+                {"position": "Çalışan"} # role yerine position
             ]
         }
     }

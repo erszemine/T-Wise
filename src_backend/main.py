@@ -136,7 +136,7 @@ async def register_user(user_register: UserRegister):
 app.include_router(product_router)
 app.include_router(stock_router)
 app.include_router(stock_management_router)
-app.include_router(user_router)
+app.include_router(user_router, prefix="/users", tags=["Users"])
 
 # Varsayılan kök endpoint
 @app.get("/", summary="API'nin ana kök dizini")
