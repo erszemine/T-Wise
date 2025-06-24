@@ -70,9 +70,9 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 origins = [
-    "http://localhost:8000", # Backend URL'si
-    "http://localhost:8080", # BURADA SİZİN FRONTEND URL'İNİZ OLMALI!
-    # Eğer frontend'i farklı bir portta (örn. 8002, 8003) test ederseniz, o URL'leri de buraya eklemelisiniz.
+    "http://localhost:8000", # Backend URL
+    "http://localhost:8080", # Frontend URL
+
 ]
 
 # CORS Middleware
@@ -134,8 +134,8 @@ async def register_user(user_register: UserRegister):
 
 # --- Router'ları Uygulamaya Dahil Et ---
 app.include_router(product_router)
-app.include_router(stock_router)
-app.include_router(stock_management_router)
+app.include_router(stock_router, prefix="/api/stock", tags=["Stock"])
+app.include_router(stock_management_router,prefix="/api/stock-management", tags=["Stock Management"])
 app.include_router(user_router, prefix="/users", tags=["Users"])
 
 # Varsayılan kök endpoint
