@@ -30,19 +30,19 @@ class UserRegister(BaseModel):
     position: str = "Depo Sorumlusu" # Varsayılan rol
 
 # Veritabanı bağlantısı (database.py dosyasından connect_db fonksiyonu)
-from database import connect_db
+from .database import connect_db
 
 # Güvenlik ve kullanıcı modelleri
-from security import create_access_token, authenticate_user, hash_password, get_current_user
-from models_entity.User import User
+from .security import create_access_token, authenticate_user, hash_password, get_current_user
+from .models_entity.User import User
 from beanie import PydanticObjectId
 
 # API Router'larını import edin
-from api.product_routes import router as product_router
-from api.stock_routes import router as stock_router
-from api.stock_management_routes import router as stock_management_router
-from api.user_routes import router as user_router
-from api.auth_routes import router as auth_router
+from .api.product_routes import router as product_router
+from .api.stock_routes import router as stock_router
+from .api.stock_management_routes import router as stock_management_router
+from .api.user_routes import router as user_router
+from .api.auth_routes import router as auth_router
 
 
 # Uygulama yaşam döngüsü yöneticisi

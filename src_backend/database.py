@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 from typing import List, Type
 
 # src_backend paketinin içindeki models_entity altından
-from models_entity.Product import Product
-from models_entity.Stock import Stock
-from models_entity.StockMovement import StockMovement
-from models_entity.User import User
+from .models_entity.Product import Product
+from .models_entity.Stock import Stock
+from .models_entity.StockMovement import StockMovement
+from .models_entity.User import User
 
 # src_backend paketinin içindeki config modülünden
-from config import MONGO_URI, MONGO_DATABASE_NAME # NOT: config.py'de DATABASE_URL yerine MONGO_URI kullanıldığını varsayıyorum
+from .config import MONGO_URI, MONGO_DATABASE_NAME # NOT: config.py'de DATABASE_URL yerine MONGO_URI kullanıldığını varsayıyorum
 
 # from models_entity.UretimTalebi import UretimTalebi # Üretim talebi kullanılmayacağı için yorum satırı yapıldı veya silindi
 

@@ -10,9 +10,9 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from models_entity.User import User
+from .models_entity.User import User
 from beanie import PydanticObjectId 
-from enums import UserPosition
+from .enums import UserPosition
 
 load_dotenv() # .env dosyasını yükler
 

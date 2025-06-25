@@ -6,9 +6,9 @@ from datetime import datetime
 from typing import Optional, List, Annotated # Annotated'ı import ediyoruz
 
 # ProductResponse şemamızı import ediyoruz
-from schemas.product_schemas import ProductResponse # BU SATIR ÇOK ÖNEMLİ!
+from ..schemas.product_schemas import ProductResponse # BU SATIR ÇOK ÖNEMLİ!
 # Beanie Product modelini de import etmeliyiz, çünkü BeforeValidator onu işleyecek.
-from models_entity.Product import Product # BU SATIR DA ÇOK ÖNEMLİ!
+from ..models_entity.Product import Product # BU SATIR DA ÇOK ÖNEMLİ!
 
 
 # Yardımcı bir dönüştürme fonksiyonu

@@ -3,7 +3,7 @@ from beanie import Document, PydanticObjectId
 from pydantic import Field
 from datetime import datetime
 from typing import Optional
-from enums import UserPosition
+from ..enums import UserPosition
 
 class User(Document):
     username: str

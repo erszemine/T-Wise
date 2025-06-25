@@ -5,10 +5,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 
-from models_entity.User import User
-from security import create_access_token, authenticate_user, hash_password
-from schemas.user_schemas import UserCreate, UserResponse
-from enums import UserPosition
+from ..models_entity.User import User
+from ..security import create_access_token, authenticate_user, hash_password
+from ..schemas.user_schemas import UserCreate, UserResponse
+from ..enums import UserPosition
+from ..security import role_required
+
 
 router = APIRouter(prefix="/api", tags=["Authentication"])
 
@@ -40,7 +42,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register", status_code=status.HTTP_201_CREATED, summary="Yeni kullanıcı kaydı")
-async def register_user(user_data: UserCreate):
+async def register_user(
+    user_data: UserCreate,
+    # Sadece Administrator yetkisine sahip kullanıcıların yeni kayıt yapmasına izin ver
+    current_user: User = Depends(role_required([UserPosition.ADMIN])) 
+):
     existing_user = await User.find_one(User.username == user_data.username)
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Kullanıcı adı zaten mevcut")
@@ -59,4 +65,4 @@ async def register_user(user_data: UserCreate):
     new_user = User(**user_dict)
     await new_user.insert()
     
-    return {"username": new_user.username, "message": "Kullanıcı başarıyla kaydedildi, lütfen giriş yapın."}
+    return {"username": new_user.username, "message": "Kullanıcı başarıyla kaydedildi."}

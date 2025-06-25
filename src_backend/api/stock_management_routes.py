@@ -5,17 +5,19 @@ from bson.objectid import ObjectId
 from datetime import datetime
 from pydantic import BaseModel, Field
 
-from models_entity.Stock import Stock
-from models_entity.Product import Product
-from models_entity.StockMovement import StockMovement
-# from models_entity.UretimTalebi import UretimTalebi # Üretim talebi kullanılmayacağı için yorum satırı yapıldı veya silindi
-from models_entity.User import User
-from security import role_required, get_current_user
+from src_backend.enums import UserPosition
 
-from schemas.stock_movement_schemas import StockMovementResponse, StockMovementCreate
+from ..models_entity.Stock import Stock
+from ..models_entity.Product import Product
+from ..models_entity.StockMovement import StockMovement
+# from models_entity.UretimTalebi import UretimTalebi # Üretim talebi kullanılmayacağı için yorum satırı yapıldı veya silindi
+from ..models_entity.User import User
+from ..security import role_required, get_current_user
+
+from ..schemas.stock_movement_schemas import StockMovementResponse, StockMovementCreate
 # Diğer şemaları da import ettiğinizden emin olun (ProductResponse, UserResponse)
-from schemas.product_schemas import ProductResponse
-from schemas.user_schemas import UserResponse
+from ..schemas.product_schemas import ProductResponse
+from ..schemas.user_schemas import UserResponse
 
 
 router = APIRouter(prefix="/api/stock-management", tags=["Stock Management"])
@@ -28,7 +30,7 @@ router = APIRouter(prefix="/api/stock-management", tags=["Stock Management"])
 )
 async def record_stock_movement(
     movement_data: StockMovementCreate, # schemas'tan gelen StockMovementCreate kullanılacak
-    current_user: User = Depends(role_required(["Yönetici", "Depo Sorumlusu"]))
+    current_user: User = Depends(role_required([UserPosition.ADMIN, UserPosition.DEPO_YONETICISI]))
 ):
     try:
         # PydanticObjectId yerine ObjectId kullanıyorsanız, `product_id` alanını `str` olarak tanımlamanız

@@ -5,15 +5,15 @@ from typing import List, Optional
 from beanie import PydanticObjectId, Link # PydanticObjectId ve Link'i import ediyoruz
 from datetime import datetime
 
-from models_entity.Stock import Stock
-from models_entity.Product import Product # Product modelini import ediyoruz
-from models_entity.User import User # Kullanıcı yetkilendirme için
+from ..models_entity.Stock import Stock
+from ..models_entity.Product import Product # Product modelini import ediyoruz
+from ..models_entity.User import User # Kullanıcı yetkilendirme için
 
-from security import role_required, get_current_user
-from enums import UserPosition # UserPosition enum'ını import ediyoruz
+from ..security import role_required, get_current_user
+from ..enums import UserPosition # UserPosition enum'ını import ediyoruz
 
 # Şemaları doğru yoldan import ediyoruz
-from schemas.stock_shemas import StockResponse, StockCreate, StockUpdate
+from ..schemas.stock_shemas import StockResponse, StockCreate, StockUpdate
 
 
 router = APIRouter(prefix="/api/stock", tags=["Stock"])

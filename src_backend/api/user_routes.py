@@ -4,16 +4,16 @@ from beanie import PydanticObjectId # bson.objectid.ObjectId yerine PydanticObje
 from datetime import datetime
 
 # models_entity'den User modelini import ediyoruz
-from models_entity.User import User 
+from ..models_entity.User import User 
 
 # Güvenlik modüllerini import ediyoruz
-from security import role_required, get_current_user, hash_password
+from ..security import role_required, get_current_user, hash_password
 
 # Schema'ları import ediyoruz
-from schemas.user_schemas import UserCreate, UserUpdate, UserResponse, UserPositionUpdate
+from ..schemas.user_schemas import UserCreate, UserUpdate, UserResponse, UserPositionUpdate
 
 # Enums'ı import ediyoruz!
-from enums import UserPosition 
+from ..enums import UserPosition 
 
 router = APIRouter(prefix="/api/users", tags=["Users"]) # Router'a prefix ve tags eklemek iyi bir pratiktir
 

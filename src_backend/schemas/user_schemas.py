@@ -3,7 +3,7 @@ from beanie import PydanticObjectId # MongoDB ObjectID'leri için Pydantic uyuml
 from typing import Optional, List
 from datetime import datetime
 
-from enums import UserPosition # Burayı ekliyoruz!
+from ..enums import UserPosition # Burayı ekliyoruz!
 
 
 # Kullanıcı oluşturmak için gelen istek gövdesinin şeması (POST /users/)

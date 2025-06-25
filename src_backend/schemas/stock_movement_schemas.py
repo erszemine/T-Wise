@@ -6,12 +6,12 @@ from typing import Optional, List, Annotated
 import enum # <-- Bu satırı ekleyin
 
 # Gerekli şemaları import ediyoruz
-from schemas.product_schemas import ProductResponse
-from schemas.user_schemas import UserResponse
+from ..schemas.product_schemas import ProductResponse
+from ..schemas.user_schemas import UserResponse
 
 # Gerekli Beanie modellerini import ediyoruz
-from models_entity.Product import Product
-from models_entity.User import User
+from ..models_entity.Product import Product
+from ..models_entity.User import User
 
 
 # --- Dönüştürme Yardımcı Fonksiyonları ---
