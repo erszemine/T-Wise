@@ -7,9 +7,6 @@ from datetime import datetime
 # components için Dict import edildiğinden emin olun
 from typing import Dict # Bunu da ProductBase'e eklemişsiniz ama tekrar emin olalım
 
-# --- YENİ BİR TEMEL ŞEMA: ProductCreateUpdateBase ---
-# Bu şema, hem oluşturma hem de güncelleme için ortak alanları içerir.
-# Otomatik atanan alanları (id, created_at, updated_at) içermez.
 class ProductCreateUpdateBase(BaseModel):
     name: str = Field(..., min_length=2, max_length=100, description="Ürünün veya parçanın adı.")
     code: str = Field(..., min_length=2, max_length=50, description="Ürünün veya parçanın benzersiz kodu.")
@@ -24,8 +21,8 @@ class ProductCreateUpdateBase(BaseModel):
     is_active: bool = Field(True, description="Ürünün aktif olup olmadığı.")
     components: Optional[List[Dict]] = Field([], description="Ürünün üretim için gerekli alt parçaları (BOM)") # Burası Product modelinizle uyumlu olmalı
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "name": "Ön Fren Balatası",
                 "code": "FREN-BALATA-001",
@@ -41,6 +38,7 @@ class ProductCreateUpdateBase(BaseModel):
                 "components": []
             }
         }
+    }
 
 # Product creation schema - Yeni ürün oluşturulurken kullanılır
 class ProductCreate(ProductCreateUpdateBase):
@@ -85,13 +83,15 @@ class ProductResponse(BaseModel):
     created_at: datetime = Field(description="Ürünün oluşturulma tarihi ve saati.")
     updated_at: datetime = Field(description="Ürünün son güncellenme tarihi ve saati.")
 
-    class Config:
-        populate_by_name = True # _id alanını id olarak kullanmamızı sağlar
-        json_encoders = {
-            PydanticObjectId: str, # ObjectId'yi string'e çevirir
-            datetime: lambda v: v.isoformat() + "Z" # datetime objesini ISO formatına çevirir ve Z (UTC) ekler
-        }
-        arbitrary_types_allowed = True # PydanticObjectId için gerekli
+    model_config = {
+        "populate_by_name": True,
+        "from_attributes": True, # Beanie Document'tan Pydantic modele dönüşüm için kritik
+        "json_encoders": { # json_encoders hala model_config içinde çalışır
+            PydanticObjectId: str,
+            datetime: lambda v: v.isoformat() + "Z"
+        },
+        "arbitrary_types_allowed": True
+    }
 
 
 # API response for a list of products
@@ -99,5 +99,7 @@ class ProductListResponse(BaseModel):
     products: List[ProductResponse]
     total_count: int
 
-    class Config:
-        pass # Config: pass bırakılabilir veya ek ayarlamalar yapılabilir
+    # Pydantic V2: model_config kullanın
+    model_config = {
+        "from_attributes": True
+    }

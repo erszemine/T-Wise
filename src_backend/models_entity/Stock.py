@@ -22,6 +22,14 @@ class Stock(Document):
     class Settings:
         name = "stocks"
         indexes = [
-            ''' "product",
-            ("location", "product", {"unique": True}), '''
+            #"product", # Tekil alan indeksi
+            #(
+                #[("location", 1), ("product", 1)],  # Bileşik indeks anahtarları: (alan adı, sıralama yönü)
+                #{"unique": True} # Bileşik indeks için seçenekler (benzersizlik)
+            #),
         ]
+
+    # model_config'i ekleyin
+    model_config = {
+        "from_attributes": True
+    }

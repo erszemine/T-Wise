@@ -12,44 +12,48 @@ from models_entity.StockMovement import StockMovement
 from models_entity.User import User
 from security import role_required, get_current_user
 
-router = APIRouter()
+from schemas.stock_movement_schemas import StockMovementResponse, StockMovementCreate
+# Diğer şemaları da import ettiğinizden emin olun (ProductResponse, UserResponse)
+from schemas.product_schemas import ProductResponse
+from schemas.user_schemas import UserResponse
 
-class StockMovementRequest(BaseModel):
-    product_id: str
-    movement_type: str # Örn: "Giriş", "Çıkış", "İade", "Düzeltme"
-    quantity: int # Giriş için pozitif, çıkış için negatif
-    reference_document: Optional[str] = None # Fatura no, sipariş no vb.
-    location: Optional[str] = "UNKNOWN" # Hangi konumdan/konuma hareket yapıldığı (şimdilik opsiyonel)
 
-class StockMovementResponse(StockMovement):
-    id: str = Field(alias="_id")
-    product: str # Sadece ID
-    performed_by: str # Sadece ID
-    product_details: Optional[Product] = None # İlişkili ürün detayları
-    performed_by_details: Optional[User] = None # İlişkili kullanıcı detayları
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
-        populate_by_name = True
+router = APIRouter(prefix="/api/stock-management", tags=["Stock Management"])
 
-class PlanIncomingPartsRequest(BaseModel):
-    needed_parts: List[Dict[str, int]] # [{'product_id': '...', 'quantity': ...}]
-    supplier_info: Optional[str] = None # Tedarikçi ID'si veya adı
-    delivery_date: Optional[datetime] = None # Tahmini teslim tarihi
-
-@router.post("/record-movement", response_model=StockMovementResponse, status_code=status.HTTP_201_CREATED, summary="Yeni bir stok hareketi kaydet ve stok miktarını güncelle")
-async def record_stock_movement(movement_data: StockMovementRequest, current_user: User = Depends(role_required(["Yönetici", "Depo Sorumlusu"]))):
+@router.post(
+    "/record-movement",
+    response_model=StockMovementResponse, # schemas'tan gelen StockMovementResponse kullanılacak
+    status_code=status.HTTP_201_CREATED,
+    summary="Yeni bir stok hareketi kaydet ve stok miktarını güncelle"
+)
+async def record_stock_movement(
+    movement_data: StockMovementCreate, # schemas'tan gelen StockMovementCreate kullanılacak
+    current_user: User = Depends(role_required(["Yönetici", "Depo Sorumlusu"]))
+):
     try:
-        product = await Product.get(ObjectId(movement_data.product_id))
+        # PydanticObjectId yerine ObjectId kullanıyorsanız, `product_id` alanını `str` olarak tanımlamanız
+        # ve burada `ObjectId(movement_data.product_id)` ile dönüştürmeniz gerekir.
+        # Eğer Product modelinde _id tipi PydanticObjectId ise, PydanticObjectId kullanmak daha tutarlıdır.
+        product = await Product.get(movement_data.product_id) # Product.get(PydanticObjectId(movement_data.product_id)) daha doğru
         if not product:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="İlgili ürün bulunamadı")
 
+        # current_user zaten bir User Beanie dokümanı. Link olarak atayabilirsiniz.
+        # Performansı artırmak için User.get ile çekmek yerine doğrudan current_user'ı atayabiliriz
+        # ancak Type Hinting'in doğru çalıştığından emin olmak gerekir.
+        # `current_user` doğrudan User objesi olduğu için Beanie onu otomatik olarak linkleyecektir.
+        # Eğer current_user bir Link objesi ise, `current_user.ref` kullanmak gerekir.
+        # Ancak Depends(get_current_user) bize direkt User objesini verir.
+        performed_by_link = current_user # Veya eğer current_user bir link ise: current_user.ref
+
         # Stok kaydını bul veya oluştur
-        # Basit versiyonda, her ürün için tek bir genel stok kaydı olduğunu varsayalım veya konum bazında kontrol edelim
-        stock = await Stock.find_one(Stock.product.id == product.id, Stock.location == movement_data.location)
+        stock = await Stock.find_one(
+            Stock.product.id == product.id,
+            Stock.location == movement_data.location # movement_data.location null olabilir, kontrol edin
+        )
         if not stock:
             # Yeni konumda veya ürün için ilk stok kaydı ise oluştur
-            stock = Stock(product=product, location=movement_data.location, current_quantity=0)
+            stock = Stock(product=product, location=movement_data.location or "UNKNOWN", current_quantity=0)
             await stock.insert()
 
         # Stok miktarını güncelle
@@ -67,81 +71,48 @@ async def record_stock_movement(movement_data: StockMovementRequest, current_use
         await stock.save()
 
         new_movement = StockMovement(
-            product=product,
+            product=product, # product objesi otomatik olarak linklenecek
             movement_type=movement_data.movement_type,
             quantity=movement_data.quantity,
             reference_document=movement_data.reference_document,
-            performed_by=current_user
+            performed_by=performed_by_link, # User objesi otomatik olarak linklenecek
+            # Diğer alanlar
+            from_location=movement_data.from_location,
+            to_location=movement_data.to_location,
+            remarks=movement_data.remarks
         )
         await new_movement.insert()
 
-        return StockMovementResponse(
-            **new_movement.dict(),
-            id=str(new_movement.id),
-            product=str(new_movement.product.id),
-            performed_by=str(new_movement.performed_by.id),
-            product_details=product,
-            performed_by_details=current_user
-        )
+        # Oluşturulan hareketin tam detaylarını (linkli belgelerle birlikte) döndür
+        # Sadece Beanie dokümanını döndürüyoruz. schemas/stock_movement_schemas.py'deki
+        # StockMovementResponse, Link'leri otomatik olarak dönüştürecektir.
+        # Bu satırı kullanmak yerine, direkt new_movement objesini döndürmeniz daha temizdir:
+        # created_movement_with_details = await StockMovement.get(new_movement.id, fetch_links=True)
+        # return created_movement_with_details
+        
+        # Eğer Post operasyonunda tam olarak linkleri çekmek istiyorsanız:
+        await new_movement.fetch_links() # Linkleri burada çekin
+        return new_movement # Beanie dokümanını döndürün, şema otomatik dönüştürür
+
     except HTTPException as e:
         raise e
     except Exception as e:
+        # Hatanın detayını loglamak ve hata mesajında vermek faydalıdır.
+        print(f"Stok hareketi kaydedilemedi hatası: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Stok hareketi kaydedilemedi: {e}")
 
-@router.get("/movements", response_model=List[StockMovementResponse], summary="Tüm stok hareketlerini listele")
+
+@router.get(
+    "/movements",
+    response_model=List[StockMovementResponse], # schemas'tan gelen StockMovementResponse kullanılacak
+    summary="Tüm stok hareketlerini listele"
+)
 async def get_all_stock_movements(current_user: User = Depends(get_current_user)):
-    movements = await StockMovement.find_all().to_list()
-    response_list = []
-    for movement in movements:
-        await movement.fetch_link(StockMovement.product)
-        await movement.fetch_link(StockMovement.performed_by)
-        response_list.append(StockMovementResponse(
-            **movement.dict(),
-            id=str(movement.id),
-            product=str(movement.product.id),
-            performed_by=str(movement.performed_by.id),
-            product_details=movement.product,
-            performed_by_details=movement.performed_by
-        ))
-    return response_list
+    # fetch_links=True kullanarak tüm linkli dokümanları çekin
+    # Bu, her hareket için ayrı ayrı fetch_link çağırmaktan daha verimlidir.
+    movements = await StockMovement.find_all(fetch_links=True).to_list()
+    
+    # Listeyi doğrudan döndürün. StockMovementResponse şeması dönüşümü yapacaktır.
+    return movements
 
-@router.post("/plan-incoming-parts", status_code=status.HTTP_200_OK, summary="Gelecek parçaları planla (sipariş oluşturma)")
-async def plan_incoming_parts(request_body: PlanIncomingPartsRequest, current_user: User = Depends(role_required(["Yönetici", "Depo Sorumlusu"]))):
-    movements_created = []
-    for item in request_body.needed_parts:
-        product_id = ObjectId(item['product_id'])
-        quantity = item['quantity']
 
-        product = await Product.get(product_id)
-        if not product:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Ürün bulunamadı: {item['product_id']}")
-
-        # Varsayılan konumu "UNKNOWN" olarak alalım veya request_body'den alalım
-        location = "UNKNOWN" # Burayı dinamik yapabilirsiniz
-
-        stock_record = await Stock.find_one(Stock.product.id == product_id, Stock.location == location)
-        if stock_record:
-            stock_record.incoming_quantity += quantity
-            await stock_record.save()
-        else:
-            new_stock = Stock(product=product, location=location, incoming_quantity=quantity, current_quantity=0)
-            await new_stock.insert()
-
-        movement = StockMovement(
-            product=product,
-            movement_type="Giriş (Sipariş Edildi)",
-            quantity=quantity,
-            reference_document=f"Tedarikçi Siparişi: {request_body.supplier_info or 'N/A'}",
-            performed_by=current_user
-        )
-        await movement.insert()
-        movements_created.append(StockMovementResponse(
-            **movement.dict(),
-            id=str(movement.id),
-            product=str(movement.product.id),
-            performed_by=str(movement.performed_by.id),
-            product_details=product,
-            performed_by_details=current_user
-        ))
-
-    return {"message": "Gelecek parçalar başarıyla planlandı.", "movements": movements_created}

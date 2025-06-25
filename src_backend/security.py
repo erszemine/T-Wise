@@ -11,7 +11,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from models_entity.User import User
-from beanie import PydanticObjectId # Değişiklik: ObjectId yerine PydanticObjectId
+from beanie import PydanticObjectId 
+from enums import UserPosition
 
 load_dotenv() # .env dosyasını yükler
 
@@ -70,12 +71,12 @@ async def authenticate_user(username: str, password: str) -> Optional[User]:
             return user
     return None # Kullanıcı bulunamazsa veya şifre yanlışsa None döndürür
 
-def role_required(roles: List[str]):
-    def role_checker(current_user: User = Depends(get_current_user)):
-        if current_user.role not in roles:
+def role_required(required_positions: List[UserPosition]): # Parametre tipi UserPosition listesi oldu
+    async def _role_checker(current_user: User = Depends(get_current_user)): # async eklendi
+        if current_user.position not in required_positions:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Yetkiniz yok"
+                detail="Bu işlemi gerçekleştirmek için yetkiniz yok." # Detay mesajı daha açıklayıcı
             )
         return current_user
-    return role_checker
+    return _role_checker

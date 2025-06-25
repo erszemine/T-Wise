@@ -42,6 +42,7 @@ from api.product_routes import router as product_router
 from api.stock_routes import router as stock_router
 from api.stock_management_routes import router as stock_management_router
 from api.user_routes import router as user_router
+from api.auth_routes import router as auth_router
 
 
 # Uygulama yaşam döngüsü yöneticisi
@@ -86,7 +87,7 @@ app.add_middleware(
 
 # --- API Rotaları ---
 
-# Login Endpoint
+"""# Login Endpoint
 @app.post("/api/token", response_model=Token, summary="Kullanıcı girişi ve token alma")
 async def login_for_access_token(user_login: UserLogin):
     user = await authenticate_user(user_login.username, user_login.password)
@@ -129,14 +130,15 @@ async def register_user(user_register: UserRegister):
         created_at=datetime.utcnow() # created_at eklendi
     )
     await new_user.insert()
-    return {"username": new_user.username, "message": "Kullanıcı başarıyla kaydedildi, lütfen giriş yapın."}
+    return {"username": new_user.username, "message": "Kullanıcı başarıyla kaydedildi, lütfen giriş yapın."}"""
 
 
 # --- Router'ları Uygulamaya Dahil Et ---
+app.include_router(auth_router)
 app.include_router(product_router)
-app.include_router(stock_router, prefix="/api/stock", tags=["Stock"])
-app.include_router(stock_management_router,prefix="/api/stock-management", tags=["Stock Management"])
-app.include_router(user_router, prefix="/users", tags=["Users"])
+app.include_router(stock_router)
+app.include_router(stock_management_router)
+app.include_router(user_router)
 
 # Varsayılan kök endpoint
 @app.get("/", summary="API'nin ana kök dizini")

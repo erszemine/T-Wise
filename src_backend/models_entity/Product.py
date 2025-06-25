@@ -36,3 +36,6 @@ class Product(Document):
         # Beanie 1.x ve üzeri için varsayılan "_id" alanını otomatik olarak tanır.
         # Bu yüzden `id: PydanticObjectId` gibi bir tanıma gerek yoktur.
         # Ancak ProductResponse şemasında bunu "id" olarak aliaslamak gerekir.
+    model_config = {
+        "from_attributes": True
+    }

@@ -3,6 +3,7 @@ from beanie import Document, PydanticObjectId
 from pydantic import Field
 from datetime import datetime
 from typing import Optional
+from enums import UserPosition
 
 class User(Document):
     username: str
@@ -11,8 +12,7 @@ class User(Document):
     first_name: str
     last_name: str
     email: Optional[str] = None
-    # role yerine position kullanın:
-    position: str # role yerine position
+    position: UserPosition = Field(default= None)
     is_active: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -24,3 +24,6 @@ class User(Document):
             PydanticObjectId: str
         }
         keep_updated = True
+    model_config = {
+        "from_attributes": True
+    }

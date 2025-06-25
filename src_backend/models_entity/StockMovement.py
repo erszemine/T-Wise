@@ -1,5 +1,3 @@
-
-
 # src_backend/models_entity/StockMovement.py
 from datetime import datetime
 from typing import Optional
@@ -15,13 +13,20 @@ class StockMovement(Document):
     reference_document: Optional[str] = Field(None, description="Hareketi tetikleyen belge/referans numarası")
     performed_by: Link[User] = Field(description="Hareketi gerçekleştiren kullanıcı")
 
-    movement_date: datetime = Field(default_factory=datetime.now, description="Hareketin gerçekleştiği tarih ve saat")
+    # Zaman dilimi tutarlılığı için utcnow kullanın
+    movement_date: datetime = Field(default_factory=datetime.utcnow, description="Hareketin gerçekleştiği tarih ve saat")
 
     class Settings:
         name = "stock_movements"
+        # Index tanımlarını doğru formatta verin
         indexes = [
-          '''  "product",
-            "movement_date",
-            "movement_type",
-            "performed_by", '''
+            #"product",
+            #"movement_date",
+            #"movement_type",
+            #"performed_by",
         ]
+
+    # model_config, Settings sınıfının dışında olmalıdır.
+    model_config = {
+        "from_attributes": True
+    }

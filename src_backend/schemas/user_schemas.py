@@ -3,6 +3,9 @@ from beanie import PydanticObjectId # MongoDB ObjectID'leri için Pydantic uyuml
 from typing import Optional, List
 from datetime import datetime
 
+from enums import UserPosition # Burayı ekliyoruz!
+
+
 # Kullanıcı oluşturmak için gelen istek gövdesinin şeması (POST /users/)
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50, description="Kullanıcı adı")
@@ -10,9 +13,11 @@ class UserCreate(BaseModel):
     email: Optional[EmailStr] = Field(None, description="Kullanıcının e-posta adresi")
     first_name: Optional[str] = Field(None, max_length=50, description="Kullanıcının adı")
     last_name: Optional[str] = Field(None, max_length=50, description="Kullanıcının soyadı")
-    position: Optional[str] = Field("user", description="Kullanıcının pozisyonu (örn: Yönetici, Çalışan, Depo Sorumlusu)") # role yerine position
-
-    password_hash: Optional[str] = None
+    # position tipini UserPosition enum'ı olarak değiştiriyoruz ve varsayılan değer veriyoruz
+    position: UserPosition = Field(UserPosition.STOK_KONTROL_UZMANI, description="Kullanıcının pozisyonu") # BURADA DEĞİŞİKLİK
+    
+    # password_hash client'tan gelmez, server'da oluşturulur, bu yüzden buradan kaldırıyoruz
+    # password_hash: Optional[str] = None 
     
     model_config = {
         "json_schema_extra": {
@@ -23,7 +28,7 @@ class UserCreate(BaseModel):
                     "email": "newuser@example.com",
                     "first_name": "Ayşe",
                     "last_name": "Yılmaz",
-                    "position": "user" # role yerine position
+                    "position": UserPosition.STOK_KONTROL_UZMANI.value # Enum değerini string olarak örnekte gösteriyoruz
                 }
             ]
         }
@@ -36,7 +41,8 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = Field(None, description="Güncellenmiş e-posta adresi")
     first_name: Optional[str] = Field(None, max_length=50, description="Güncellenmiş adı")
     last_name: Optional[str] = Field(None, max_length=50, description="Güncellenmiş soyadı")
-    position: Optional[str] = Field(None, description="Güncellenmiş pozisyon") # role yerine position
+    # position tipini UserPosition enum'ı olarak değiştiriyoruz
+    position: Optional[UserPosition] = Field(None, description="Güncellenmiş pozisyon") # BURADA DEĞİŞİKLİK
     is_active: Optional[bool] = Field(None, description="Kullanıcının aktiflik durumu")
 
     model_config = {
@@ -44,7 +50,8 @@ class UserUpdate(BaseModel):
             "examples": [
                 {
                     "email": "updated@example.com",
-                    "is_active": False
+                    "is_active": False,
+                    "position": UserPosition.DEPO_YONETICISI.value # Enum değerini string olarak örnekte gösteriyoruz
                 }
             ]
         }
@@ -57,38 +64,31 @@ class UserResponse(BaseModel):
     email: Optional[EmailStr] = Field(None, description="Kullanıcının e-posta adresi")
     first_name: Optional[str] = Field(None, description="Kullanıcının adı")
     last_name: Optional[str] = Field(None, description="Kullanıcının soyadı")
-    position: str = Field(description="Kullanıcının pozisyonu") # role yerine position
+    # position tipini UserPosition enum'ı olarak değiştiriyoruz
+    position: UserPosition = Field(description="Kullanıcının pozisyonu") # BURADA DEĞİŞİKLİK
     is_active: bool = Field(description="Kullanıcının aktiflik durumu")
     created_at: datetime = Field(description="Kullanıcının oluşturulma tarihi")
-    updated_at: datetime = Field(description="Kullanıcının son güncellenme tarihi")
+    updated_at: Optional[datetime] = Field(None, description="Kullanıcının son güncellenme tarihi")
 
     model_config = {
         "populate_by_name": True,
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "id": "60c72b2f9f1b2c3d4e5f6a7c",
-                    "username": "adminuser",
-                    "email": "admin@example.com",
-                    "first_name": "Can",
-                    "last_name": "Demir",
-                    "position": "Yönetici", # role yerine position
-                    "is_active": True,
-                    "created_at": "2023-01-01T10:00:00.000Z",
-                    "updated_at": "2023-01-01T10:00:00.000Z"
-                }
-            ]
-        }
+        "from_attributes": True, # Beanie User Document'tan dönüşüm için
+        "json_encoders": {
+            PydanticObjectId: str,
+            datetime: lambda v: v.isoformat() + "Z"
+        },
+        "arbitrary_types_allowed": True
     }
 
 # Kullanıcının pozisyonunu güncellemek için özel şema (PATCH /users/{id}/position)
-class UserPositionUpdate(BaseModel): # UserRoleUpdate yerine UserPositionUpdate yaptım
-    position: str = Field(..., description="Kullanıcının yeni pozisyonu (örn: Yönetici, Çalışan, Depo Sorumlusu)") # role yerine position
+class UserPositionUpdate(BaseModel):
+    # position tipini UserPosition enum'ı olarak değiştiriyoruz
+    position: UserPosition = Field(..., description="Kullanıcının yeni pozisyonu") # BURADA DEĞİĞİŞİKLİK
 
     model_config = {
         "json_schema_extra": {
             "examples": [
-                {"position": "Çalışan"} # role yerine position
+                {"position": UserPosition.KALITE_KONTROL_UZMANI.value} # Enum değerini string olarak örnekte gösteriyoruz
             ]
         }
     }
